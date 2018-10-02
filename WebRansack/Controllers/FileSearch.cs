@@ -2,7 +2,7 @@
 namespace WebRansack
 {
 
-    
+
     public class SearchResult
     {
         public string File;
@@ -22,8 +22,18 @@ namespace WebRansack
         
         
     } // End Class SearchResult 
-    
-    
+
+
+
+    public class SearchArguments
+    {
+        public string FileName;
+        public string ContainingText;
+        public string LookIn;
+        public bool Subfolders;
+    }
+
+
     public class FileSearch
     {
         
@@ -44,8 +54,15 @@ namespace WebRansack
             path = @"D:\username\Documents\Visual Studio 2017\Projects";
             string searchTerm = @"RedmineSuperUser";
             string pattern = "*.cs";
-            
-            System.Collections.Generic.List<SearchResult> ls = SearchContent(path, pattern, searchTerm);
+
+            SearchArguments searchArguments = new SearchArguments()
+            {
+                LookIn = path,
+                FileName = pattern,
+                ContainingText = searchTerm
+            };
+
+            System.Collections.Generic.List<SearchResult> ls = SearchContent(searchArguments);
             
             for (int j = 0; j < ls.Count; ++j)
             {
@@ -55,17 +72,14 @@ namespace WebRansack
         } // End Sub Test 
         
         
-        public static System.Collections.Generic.List<SearchResult> SearchContent(
-            string path, 
-            string pattern, 
-            string searchTerm)
+        public static System.Collections.Generic.List<SearchResult> SearchContent(SearchArguments searchArguments)
         {
             System.Collections.Generic.List<SearchResult> allResults = new System.Collections.Generic.List<SearchResult>(); 
-            string[] filez = System.IO.Directory.GetFiles(path, pattern, System.IO.SearchOption.AllDirectories);
+            string[] filez = System.IO.Directory.GetFiles(searchArguments.LookIn, searchArguments.FileName, System.IO.SearchOption.AllDirectories);
             
             for (int i = 0; i < filez.Length; ++i)
             {
-                SearchContent(allResults, filez[i], searchTerm);
+                SearchContent(allResults, filez[i], searchArguments.ContainingText);
             } // Next i 
             
             return allResults;
@@ -82,7 +96,7 @@ namespace WebRansack
                 for (int lineNumber = 1; !reader.EndOfStream; ++lineNumber)
                 {
                     string line = reader.ReadLine();
-                    int pos = line.IndexOf(searchTerm);
+                    int pos = line.IndexOf(searchTerm, System.StringComparison.OrdinalIgnoreCase);
                     
                     if (pos != -1)
                     {

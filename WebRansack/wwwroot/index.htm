@@ -12,7 +12,7 @@
     <meta http-equiv="pragma" content="no-cache" />
 
 
-    <title>Maps</title>
+    <title>Sockets</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.00, minimum-scale=1.00, maximum-scale=1.00" />
 
     <style type="text/css">
@@ -46,26 +46,155 @@
     <script src="dump/polyfills/es6-promise-2.0.0.min.js?v=1"></script>
     <script src="dump/polyfills/fetch.js?v=1"></script>
     -->
-    
+
+    <fieldset>
+        <legend>Main:</legend>
+
+        <label class="lbl" for="txtFileName">File name</label>
+        <input class="txt" id="txtFileName" type="text" value="*.sql" />
+        <br /><br />
+        <label class="lbl" for="txtContainingText">Containing text</label>
+        <input class="txt" id="txtContainingText" type="text" value="SELECT" />
+        <br /><br />
+        <label class="lbl" for="txtLookIn">Look in</label>
+        <input class="txt" id="txtLookIn" type="text" value="D:\username\Documents\Visual Studio 2017\TFS\COR-Basic\COR-Basic\Basic\Basic" />
+
+        <br /><br />
+        <label class="lbl" for="cbSubfolders">Subfolders</label>
+        <input id="cbSubfolders" type="checkbox" checked="checked" />
+
+        <br /><br />
+
+        <input type="button" value="Start" onclick="startSearch()" />
+        <input type="button" value="Stop" />
+
+    </fieldset>
+
+    <div id="divResults"></div>
+
+  
     <script type="text/javascript">
         // ws/wss
-        var exampleSocket = new WebSocket("ws://localhost:57794/ws"); //, "protocolOne");
+
+        function example()
+        {
+            var exampleSocket = new WebSocket("ws://localhost:57793/ws"); //, "protocolOne");
+
+            exampleSocket.onmessage = function (event)
+            {
+                console.log("onmessage", event);
+                console.log(event.data);
+
+                // exampleSocket.close();
+            };
+
+            exampleSocket.onopen = function (event)
+            {
+                exampleSocket.send("Here's some text that the server is urgently awaiting for !");
+            };
+        }
+
+        function startSearch()
+        {
+            var exampleSocket = new WebSocket("ws://localhost:57793/ransack"); //, "protocolOne");
+
+            exampleSocket.onmessage = function (event)
+            {
+                console.log("onmessage", event);
+                console.log(event.data);
+                window.fs = JSON.parse(event.data);
+
+                let divResults = document.getElementById("divResults");
+                divResults.innerHTML = "";
+
+
+                let table = document.createElement("table");
+                
+                for (let i = 0; i < fs.length; ++i)
+                {
+                    let tr = document.createElement("tr");
+
+                    let td = document.createElement("td");
+                    td.appendChild(
+                        document.createTextNode(fs[i].File + ":" + fs[i].LineNumber)
+                    );
+                    tr.appendChild(td);
+
+                    let td2 = document.createElement("td");
+                    td2.appendChild(
+                        document.createTextNode(fs[i].Line)
+                    );
+                    tr.appendChild(td2);
+
+                    table.appendChild(tr);
+                }
+                
+                divResults.appendChild(table);
+
+                exampleSocket.close();
+            };
+
+            exampleSocket.onopen = function (event)
+            {
+                let fileName = document.getElementById("txtFileName");
+                let containingText = document.getElementById("txtContainingText");
+                let lookIn = document.getElementById("txtLookIn");
+                let subfolders = document.getElementById("cbSubfolders");
+
+                let searchSettingsOld = {
+                      "FileName": "*.sql"
+                    , "ContainingText": "SELECT"
+                    , "LookIn": "D:\\username\\Documents\\Visual Studio 2017\\TFS\\COR-Basic\\COR-Basic\\Basic\\Basic"
+                    , "Subfolders": true 
+                };
+
+
+
+                let searchSettings = {
+                    "FileName": fileName.value
+                    , "ContainingText": containingText.value
+                    , "LookIn": lookIn.value
+                    , "Subfolders": (subfolders.value == "checked")
+                };
+
+                console.log(searchSettings);
+
+                exampleSocket.send( JSON.stringify(searchSettings) );
+            };
+        }
         
-        exampleSocket.onmessage = function (event) {
-            console.log("onmessage", event);
-            console.log(event.data);
-            
-            // exampleSocket.close();
-        };
-        
-        exampleSocket.onopen = function (event) {
-            exampleSocket.send("Here's some text that the server is urgently awaiting for !");
-        };
         
     </script>
     
     <style type="text/css" media="all">
-		
+        .csbKey, .csbValue {
+            font-family: Verdana;
+            font-size: 8pt;
+        }
+
+
+        fieldset {
+            margin: 0.25cm;
+            padding: 0.25cm;
+            float: left;
+            border: 1px solid #E6E6E6;
+        }
+
+        .lbl {
+            display: inline-block;
+            width: 120px;
+        }
+
+        .txt {
+            display: inline-block;
+            width: 15cm;
+        }
+
+        tr:nth-child(2n+1) {
+            background-color: whitesmoke;
+        }
+
+
     </style>
     
 </body>

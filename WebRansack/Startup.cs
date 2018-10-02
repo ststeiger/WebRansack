@@ -230,6 +230,15 @@ namespace WebRansack
                 app.UseExceptionHandler("/Home/Error");
             }
 
+
+            app.UseDefaultFiles(new DefaultFilesOptions()
+            {
+                DefaultFileNames = new List<string>()
+                {
+                    "index.htm", "index.html", "slick.htm"
+                }
+            });
+
             app.UseStaticFiles();
 
             WebSocketOptions webSocketOptions = new WebSocketOptions()

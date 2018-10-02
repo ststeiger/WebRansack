@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -105,7 +106,7 @@ namespace WebRansack
             using (WebSocketTextWriter wtw = new WebSocketTextWriter(webSocket))
             {
 
-#if false  
+#if true  
 
                 using (Newtonsoft.Json.JsonTextWriter jsonWriter = new Newtonsoft.Json.JsonTextWriter(wtw))
                 {
@@ -114,8 +115,11 @@ namespace WebRansack
                     foreach (SearchResult thisSearchResult in FileSearch.SearchContent2(searchArguments))
                     {
                         await wsa;
+                        
+                        /*
                         Task awso = jsonWriter.WriteStartObjectAsync();
-
+                        
+                        
                         for (int i = 0; i < getters.Length; ++i)
                         {
                             await awso;
@@ -126,19 +130,22 @@ namespace WebRansack
                             await wpnt;
                             await jsonWriter.WriteValueAsync(value);
                         } // Next i 
-
-                        Task weo = jsonWriter.WriteEndObjectAsync();
+                        */
+                        
+                        serializer.Serialize(jsonWriter, thisSearchResult);
+                        
+                        // Task weo = jsonWriter.WriteEndObjectAsync();
                         if (j % 200 == 0)
                         {
                             j++;
-                            await weo;
+                            // await weo;
                             await jsonWriter.FlushAsync();
                             await wtw.FlushAsync();
                         } // Next j 
                         else
                         {
                             j++;
-                            await weo;
+                            // await weo;
                         }
                         
                     } // Next thisSearchResult 
@@ -277,6 +284,9 @@ namespace WebRansack
                     //System.Diagnostics.Process.Start("explorer.exe", "file:///D:/");
 
                     System.Uri uri = new System.Uri(@"D:\temp\SQL\COR_Basic_Demo_V4_sts.bak");
+                    if(System.Environment.OSVersion.Platform == PlatformID.Unix)
+                        uri = new System.Uri(@"/root/Downloads/built-compare.zip");
+                        
                     string fileUri = uri.AbsoluteUri;
 
                     // turns a Uri back into a local filepath too for anyone that needs this.
@@ -291,18 +301,41 @@ namespace WebRansack
 
 
 
-                    if (System.Environment.OSVersion.Platform == PlatformID.Unix)
+                    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        //  open -a Finder myTextFile.txt.
+                        using (System.Diagnostics.Process.Start("open", "-a Finder \""  + fileUri + "\"")) { }
+                    }
+                    else if (System.Environment.OSVersion.Platform == PlatformID.Unix)
                     {
                         // nautilus <path_to_file>
                         // activate window
                         // gnome-open PATH
+                        
+                        // open zip file in archiver
                         // xdg-open file
-
+                        
+                        
+                        // open explorer window with file
+                        // nautilus filename
+                        
                         // https://github.com/mono/dbus-sharp
                         // https://developers.redhat.com/blog/2017/09/18/connecting-net-core-d-bus/
                         // https://unix.stackexchange.com/questions/202214/how-can-i-open-thunar-so-that-it-selects-specific-file
-
-                        using (System.Diagnostics.Process.Start("open", fileUri)) { }
+                        
+                        //  open -a Finder myTextFile.txt.
+                        
+                        try
+                        {
+                            using (System.Diagnostics.Process.Start("nautilus1", "\"" + fileUri + "\"")) { }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            
+                        }
+                        
+                        
                     }
                     else
                     {

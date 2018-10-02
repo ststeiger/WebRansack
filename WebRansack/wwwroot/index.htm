@@ -51,14 +51,17 @@
         <legend>Main:</legend>
 
         <label class="lbl" for="txtFileName">File name</label>
-        <input class="txt" id="txtFileName" type="text" value="*.sql" />
+        <input class="txt" id="txtFileName" type="text" value="*.cs" />
         <br /><br />
         <label class="lbl" for="txtContainingText">Containing text</label>
         <input class="txt" id="txtContainingText" type="text" value="SELECT" />
-        <br /><br />
+        <br /><br />s
         <label class="lbl" for="txtLookIn">Look in</label>
+        <!--
         <input class="txt" id="txtLookIn" type="text" value="D:\username\Documents\Visual Studio 2017\TFS\COR-Basic\COR-Basic\Basic\Basic" />
-
+        -->
+        <input class="txt" id="txtLookIn" type="text" value="/root/github/RedmineMailService" />
+        
         <br /><br />
         <label class="lbl" for="cbSubfolders">Subfolders</label>
         <input id="cbSubfolders" type="checkbox" checked="checked" />
@@ -67,7 +70,7 @@
 
         <input type="button" value="Start" onclick="startSearch()" />
         <input type="button" value="Stop" />
-
+        
     </fieldset>
 
     <div id="divResults"></div>
@@ -78,7 +81,7 @@
 
         function example()
         {
-            var exampleSocket = new WebSocket("ws://localhost:57793/ws"); //, "protocolOne");
+            var exampleSocket = new WebSocket("ws://localhost:57794/ws"); //, "protocolOne");
 
             exampleSocket.onmessage = function (event)
             {
@@ -96,7 +99,7 @@
 
         function startSearch()
         {
-            var exampleSocket = new WebSocket("ws://localhost:57793/ransack"); //, "protocolOne");
+            var exampleSocket = new WebSocket("ws://localhost:57794/ransack"); //, "protocolOne");
 
             exampleSocket.onmessage = function (event)
             {
@@ -132,6 +135,7 @@
                 divResults.appendChild(table);
 
                 exampleSocket.close();
+                console.log("closed");
             };
 
             exampleSocket.onopen = function (event)

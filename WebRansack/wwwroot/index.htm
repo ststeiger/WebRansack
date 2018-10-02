@@ -59,8 +59,9 @@
         <label class="lbl" for="txtLookIn">Look in</label>
         <!--
         <input class="txt" id="txtLookIn" type="text" value="D:\username\Documents\Visual Studio 2017\TFS\COR-Basic\COR-Basic\Basic\Basic" />
-        -->
         <input class="txt" id="txtLookIn" type="text" value="/root/github/RedmineMailService" />
+        -->
+        <input class="txt" id="txtLookIn" type="text" value="C:\Users\Administrator\Documents\Visual Studio 2017\Projects\Be.HexEditor" />
         
         <br /><br />
         <label class="lbl" for="cbSubfolders">Subfolders</label>
@@ -70,14 +71,25 @@
 
         <input type="button" value="Start" onclick="startSearch()" />
         <input type="button" value="Stop" />
-        
+
     </fieldset>
+
+    <div style="clear: both;"></div>
 
     <div id="divResults"></div>
 
   
     <script type="text/javascript">
         // ws/wss
+
+        if (!String.prototype.startsWith)
+        {
+            String.prototype.startsWith = function (search, pos)
+            {
+                return this.substr(!pos || pos < 0 ? 0 : +pos, search.length) === search;
+            };
+        }
+
 
         function example()
         {
@@ -95,11 +107,29 @@
             {
                 exampleSocket.send("Here's some text that the server is urgently awaiting for !");
             };
-        }
+        } // End Function example 
+
+
+        function wsUrl(urlPart)
+        {
+            // let exampleSocket = new WebSocket("ws://localhost:57794/ransack"); //, "protocolOne");
+            let url = document.location.protocol.toLowerCase().startsWith("https")
+                ? "wss" : "ws";
+            url += "://" + document.location.host;
+
+            if (!urlPart.startsWith("/"))
+                url += "/";
+
+            url += urlPart;
+
+            // console.log(url);
+            return url;
+        } // End Function wsUrl 
+
 
         function startSearch()
         {
-            var exampleSocket = new WebSocket("ws://localhost:57794/ransack"); //, "protocolOne");
+            let exampleSocket = new WebSocket(wsUrl("ransack")); //, "protocolOne");
 
             exampleSocket.onmessage = function (event)
             {
@@ -145,17 +175,8 @@
                 let lookIn = document.getElementById("txtLookIn");
                 let subfolders = document.getElementById("cbSubfolders");
 
-                let searchSettingsOld = {
-                      "FileName": "*.sql"
-                    , "ContainingText": "SELECT"
-                    , "LookIn": "D:\\username\\Documents\\Visual Studio 2017\\TFS\\COR-Basic\\COR-Basic\\Basic\\Basic"
-                    , "Subfolders": true 
-                };
-
-
-
                 let searchSettings = {
-                    "FileName": fileName.value
+                      "FileName": fileName.value
                     , "ContainingText": containingText.value
                     , "LookIn": lookIn.value
                     , "Subfolders": (subfolders.value == "checked")
@@ -165,7 +186,7 @@
 
                 exampleSocket.send( JSON.stringify(searchSettings) );
             };
-        }
+        } // End function startSearch 
         
         
     </script>

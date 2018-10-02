@@ -74,7 +74,7 @@ namespace WebRansack
 
 
             app.UseWebSockets(webSocketOptions);
-            app.UseOpenFolderOrFileExtensions("/openfolder");
+            app.UseOpenFolderOrFileExtensions("/OpenFolder");
             app.UseRansack("/ransack");
             
 

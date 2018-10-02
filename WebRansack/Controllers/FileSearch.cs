@@ -71,45 +71,65 @@ namespace WebRansack
             
         } // End Sub Test 
         
-        
-        public static System.Collections.Generic.List<SearchResult> SearchContent(SearchArguments searchArguments)
+
+        public static System.Collections.Generic.List<SearchResult> SearchContent(
+            SearchArguments searchArguments)
         {
-            System.Collections.Generic.List<SearchResult> allResults = new System.Collections.Generic.List<SearchResult>(); 
+            System.Collections.Generic.List<SearchResult> searchResults = new System.Collections.Generic.List<SearchResult>();
+
             string[] filez = System.IO.Directory.GetFiles(searchArguments.LookIn, searchArguments.FileName, System.IO.SearchOption.AllDirectories);
-            
+
             for (int i = 0; i < filez.Length; ++i)
             {
-                SearchContent(allResults, filez[i], searchArguments.ContainingText);
-            } // Next i 
-            
-            return allResults;
-        } // End Function SearchContent 
-        
-        
-        private static void SearchContent(
-            System.Collections.Generic.List<SearchResult> searchResults, 
-            string file, 
-            string searchTerm)
-        {
-            using (System.IO.StreamReader reader = new System.IO.StreamReader(file))
-            {
-                for (int lineNumber = 1; !reader.EndOfStream; ++lineNumber)
+
+                using (System.IO.StreamReader reader = new System.IO.StreamReader(filez[i]))
                 {
-                    string line = reader.ReadLine();
-                    int pos = line.IndexOf(searchTerm, System.StringComparison.OrdinalIgnoreCase);
-                    
-                    if (pos != -1)
+                    for (int lineNumber = 1; !reader.EndOfStream; ++lineNumber)
                     {
-                        searchResults.Add(new SearchResult(file, line, lineNumber, pos));
-                    } // End if (pos != -1)
-                    
-                } // Whend 
-                
-            } // End Using reader
-            
+                        string line = reader.ReadLine();
+                        int pos = line.IndexOf(searchArguments.ContainingText, System.StringComparison.OrdinalIgnoreCase);
+
+                        if (pos != -1)
+                        {
+                            searchResults.Add(new SearchResult(filez[i], line, lineNumber, pos));
+                        } // End if (pos != -1)
+
+                    } // Whend 
+
+                } // End Using reader
+
+            } // Next i 
+
+            return searchResults;
         } // End Function SearchContent 
-        
-        
+
+
+        public static System.Collections.Generic.IEnumerable<SearchResult> SearchContent2(SearchArguments searchArguments)
+        {
+            foreach (string file in System.IO.Directory.EnumerateFiles(searchArguments.LookIn, searchArguments.FileName, System.IO.SearchOption.AllDirectories))
+            {
+
+                using (System.IO.StreamReader reader = new System.IO.StreamReader(file))
+                {
+                    for (int lineNumber = 1; !reader.EndOfStream; ++lineNumber)
+                    {
+                        string line = reader.ReadLine();
+                        int pos = line.IndexOf(searchArguments.ContainingText, System.StringComparison.OrdinalIgnoreCase);
+
+                        if (pos != -1)
+                        {
+                            yield return new SearchResult(file, line, lineNumber, pos);
+                        } // End if (pos != -1)
+
+                    } // Whend 
+
+                } // End Using reader
+
+            } // Next file 
+
+        } // End Function SearchContent 
+
+
         public static bool ContainsGroup(string file)
         {
             using (System.IO.StreamReader reader = new System.IO.StreamReader(file))

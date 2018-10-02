@@ -16,118 +16,36 @@ namespace WebRansack
 
     public class Startup
     {
+
+        public IConfiguration Configuration { get; }
+
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
         }
+        
 
-
-        public class WebSocketTextWriter : System.IO.TextWriter
+        private async Task<T> DeserializeJSON<T>(System.Net.WebSockets.WebSocket webSocket)
         {
-
-            System.Net.WebSockets.WebSocket m_webSocket;
-            System.Text.StringBuilder m_sb;
-
-
-            public WebSocketTextWriter()
-            {
-                this.m_sb = new System.Text.StringBuilder();
-            }
-
-            public WebSocketTextWriter(System.Net.WebSockets.WebSocket webSocket)
-                : this()
-            {
-                this.m_webSocket = webSocket;
-            }
-
-
-            public override void Write(char value)
-            {
-                this.m_sb.Append(value);
-            }
-
-
-            public override void Flush()
-            {
-                this.SendAsync(false).Wait();
-            }
-
-
-            public override async Task FlushAsync()
-            {
-                await this.SendAsync(false);
-            }
-
-
-            public void Transmit()
-            {
-                this.SendAsync(true).Wait();
-            }
-
-
-            public async Task TransmitAsync()
-            {
-                await this.SendAsync(true);
-            }
-
-
-            public void Send(bool endTransmission)
-            {
-                this.SendAsync(endTransmission).Wait();
-            }
-
-
-            public async Task SendAsync(bool endTransmission)
-            {
-                string answer = this.m_sb.ToString();
-                this.m_sb.Clear();
-
-                byte[] answerBuffer = this.Encoding.GetBytes(answer);
-
-                await this.SendAsync(endTransmission, answerBuffer);
-            }
-
-
-            public void Send(bool endTransmission, byte[] buffer)
-            {
-                SendAsync(endTransmission, buffer).Wait();
-            }
-
-
-            public async Task SendAsync(bool endTransmission, byte[] buffer)
-            {
-                await this.m_webSocket.SendAsync(
-                      new ArraySegment<byte>(buffer, 0, buffer.Length)
-                    , System.Net.WebSockets.WebSocketMessageType.Text
-                    , endTransmission
-                    , System.Threading.CancellationToken.None
-                );
-            }
-
-
-            public override System.Text.Encoding Encoding
-            {
-                get { return System.Text.Encoding.UTF8; }
-            }
-
-
-        }
-
-
-
-
-        private async Task Ransack(Microsoft.AspNetCore.Http.HttpContext context, System.Net.WebSockets.WebSocket webSocket)
-        {
-            SearchArguments searchArguments = null;
             Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
+            T result = await DeserializeJSON<T>(webSocket, serializer);
+            serializer = null;
+
+            return result;
+        } // End Task DeserializeJSON 
+
+
+        private async Task<T> DeserializeJSON<T>(System.Net.WebSockets.WebSocket webSocket, Newtonsoft.Json.JsonSerializer serializer)
+        {
+            T searchArguments = default(T);
 
             using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
             {
@@ -156,7 +74,7 @@ namespace WebRansack
                     {
                         try
                         {
-                            searchArguments = serializer.Deserialize<SearchArguments>(jsonReader);
+                            searchArguments = serializer.Deserialize<T>(jsonReader);
                         }
                         catch (System.Exception ex)
                         {
@@ -169,23 +87,84 @@ namespace WebRansack
 
             } // End Using ms 
 
+            return searchArguments;
+        } // End Task DeserializeJSON 
+
+
+
+        private async Task Ransack(Microsoft.AspNetCore.Http.HttpContext context, System.Net.WebSockets.WebSocket webSocket)
+        {
+            Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
+            SearchArguments searchArguments = await DeserializeJSON<SearchArguments>(webSocket, serializer);
+
+
+            string[] fieldNames = LinqHelper.GetFieldAndPropertyNames<SearchResult>();
+            Getter_t<SearchResult>[] getters = LinqHelper.GetGetters<SearchResult>(fieldNames);
+
             // Write result
             using (WebSocketTextWriter wtw = new WebSocketTextWriter(webSocket))
             {
-                System.Collections.Generic.List<SearchResult> ls = FileSearch.SearchContent(searchArguments);
+
+#if false  
+
+                using (Newtonsoft.Json.JsonTextWriter jsonWriter = new Newtonsoft.Json.JsonTextWriter(wtw))
+                {
+                    Task wsa = jsonWriter.WriteStartArrayAsync();
+                    int j = 0;
+                    foreach (SearchResult thisSearchResult in FileSearch.SearchContent2(searchArguments))
+                    {
+                        await wsa;
+                        Task awso = jsonWriter.WriteStartObjectAsync();
+
+                        for (int i = 0; i < getters.Length; ++i)
+                        {
+                            await awso;
+                            Task wpnt = jsonWriter.WritePropertyNameAsync(fieldNames[i]);
+                            object value = getters[i](thisSearchResult);
+                            // if (value == System.DBNull.Value) value = null;
+
+                            await wpnt;
+                            await jsonWriter.WriteValueAsync(value);
+                        } // Next i 
+
+                        Task weo = jsonWriter.WriteEndObjectAsync();
+                        if (j % 200 == 0)
+                        {
+                            j++;
+                            await weo;
+                            await jsonWriter.FlushAsync();
+                            await wtw.FlushAsync();
+                        } // Next j 
+                        else
+                        {
+                            j++;
+                            await weo;
+                        }
+                        
+                    } // Next thisSearchResult 
+
+                    await jsonWriter.WriteEndArrayAsync();
+
+                    await jsonWriter.FlushAsync();
+                } // End Using jsonWriter 
+
+#else
+                // System.Collections.Generic.List<SearchResult> ls = FileSearch.SearchContent(searchArguments);
+                System.Collections.Generic.IEnumerable<SearchResult> ls = FileSearch.SearchContent2(searchArguments);
 
                 using (Newtonsoft.Json.JsonTextWriter jsonWriter = new Newtonsoft.Json.JsonTextWriter(wtw))
                 {
                     serializer.Serialize(jsonWriter, ls);
-                    jsonWriter.Flush();
-                }
+                    await jsonWriter.FlushAsync();
+                } // End Using jsonWriter 
+#endif
 
-                wtw.Send(true);
+                await wtw.SendAsync(true);
             } // End Using wtw 
 
             serializer = null;
-        }
-        
+        } // End Task Ransack 
+
 
 
         // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/websockets?view=aspnetcore-2.1
@@ -232,9 +211,10 @@ namespace WebRansack
                 );
 
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), System.Threading.CancellationToken.None);
-            }
+            } // Whend 
+
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, System.Threading.CancellationToken.None);
-        }
+        } // End Task Echo 
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -370,10 +350,10 @@ namespace WebRansack
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-        }
+        } // End Sub Configure 
 
 
-    }
+    } // End Class 
 
 
-}
+} // End Namespace 

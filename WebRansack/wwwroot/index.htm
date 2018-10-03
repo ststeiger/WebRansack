@@ -34,9 +34,9 @@
 
     <!--
     <link href="leaflet/leaflet.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="ts/leaflet/EasyAjax.js" charset="utf-8"></script>
     -->
-    
+    <script type="text/javascript" src="ts/Highlighter/Highlight.js?v=1" charset="utf-8"></script>
+
 </head>
 <body>
     
@@ -62,7 +62,7 @@
         <input class="txt" id="txtLookIn" type="text" value="/root/github/RedmineMailService" />
         <input class="txt" id="txtLookIn" type="text" value="C:\Users\Administrator\Documents\Visual Studio 2017\Projects\Be.HexEditor" />
         -->
-        <input class="txt" id="txtLookIn" type="text" value="/root/github/RedmineMailService" />
+        <input class="txt" id="txtLookIn" type="text" value="D:\username\Documents\Visual Studio 2017\TFS\COR-Basic\COR-Basic\Basic\Basic" />
         
         <br /><br />
         <label class="lbl" for="cbSubfolders">Subfolders</label>
@@ -81,8 +81,7 @@
 
   
     <script type="text/javascript">
-        // ws/wss
-
+        
         if (!String.prototype.startsWith)
         {
             String.prototype.startsWith = function (search, pos)
@@ -90,161 +89,6 @@
                 return this.substr(!pos || pos < 0 ? 0 : +pos, search.length) === search;
             };
         }
-
-        var InstantSearch = {
-
-            "highlight": function (container, highlightText)
-            {
-                var internalHighlighter = function (options)
-                    {
-
-                        var id = {
-                                container: "container",
-                                tokens: "tokens",
-                                all: "all",
-                                token: "token",
-                                className: "className",
-                                sensitiveSearch: "sensitiveSearch"
-                            },
-                            tokens = options[id.tokens],
-                            allClassName = options[id.all][id.className],
-                            allSensitiveSearch = options[id.all][id.sensitiveSearch];
-
-
-                        function checkAndReplace(node, tokenArr, classNameAll, sensitiveSearchAll)
-                        {
-                            var nodeVal = node.nodeValue, parentNode = node.parentNode,
-                                i, j, curToken, myToken, myClassName, mySensitiveSearch,
-                                finalClassName, finalSensitiveSearch,
-                                foundIndex, begin, matched, end,
-                                textNode, span, isFirst;
-
-                            for (i = 0, j = tokenArr.length; i < j; i++)
-                            {
-                                curToken = tokenArr[i];
-                                myToken = curToken[id.token];
-                                myClassName = curToken[id.className];
-                                mySensitiveSearch = curToken[id.sensitiveSearch];
-
-                                finalClassName = (classNameAll ? myClassName + " " + classNameAll : myClassName);
-
-                                finalSensitiveSearch = (typeof sensitiveSearchAll !== "undefined" ? sensitiveSearchAll : mySensitiveSearch);
-
-                                isFirst = true;
-                                while (true)
-                                {
-                                    if (finalSensitiveSearch)
-                                        foundIndex = nodeVal.indexOf(myToken);
-                                    else
-                                        foundIndex = nodeVal.toLowerCase().indexOf(myToken.toLowerCase());
-
-                                    if (foundIndex < 0)
-                                    {
-                                        if (isFirst)
-                                            break;
-
-                                        if (nodeVal)
-                                        {
-                                            textNode = document.createTextNode(nodeVal);
-                                            parentNode.insertBefore(textNode, node);
-                                        } // End if (nodeVal)
-
-                                        parentNode.removeChild(node);
-                                        break;
-                                    } // End if (foundIndex < 0)
-
-                                    isFirst = false;
-
-
-                                    begin = nodeVal.substring(0, foundIndex);
-                                    matched = nodeVal.substr(foundIndex, myToken.length);
-
-                                    if (begin)
-                                    {
-                                        textNode = document.createTextNode(begin);
-                                        parentNode.insertBefore(textNode, node);
-                                    } // End if (begin)
-
-                                    span = document.createElement("span");
-                                    span.className += finalClassName;
-                                    span.appendChild(document.createTextNode(matched));
-                                    parentNode.insertBefore(span, node);
-
-                                    nodeVal = nodeVal.substring(foundIndex + myToken.length);
-                                } // Whend
-
-                            } // Next i 
-                        }; // End Function checkAndReplace 
-
-                        function iterator(p)
-                        {
-                            if (p === null) return;
-
-                            var children = Array.prototype.slice.call(p.childNodes), i, cur;
-
-                            if (children.length)
-                            {
-                                for (i = 0; i < children.length; i++)
-                                {
-                                    cur = children[i];
-                                    if (cur.nodeType === 3)
-                                    {
-                                        checkAndReplace(cur, tokens, allClassName, allSensitiveSearch);
-                                    }
-                                    else if (cur.nodeType === 1)
-                                    {
-                                        iterator(cur);
-                                    }
-                                }
-                            }
-                        }; // End Function iterator
-
-                        iterator(options[id.container]);
-                    } // End Function highlighter
-                ;
-
-
-                internalHighlighter(
-                    {
-                        container: container
-                        , all:
-                            {
-                                className: "highlighter"
-                            }
-                        , tokens: [
-                            {
-                                token: highlightText
-                                , className: "highlight"
-                                , sensitiveSearch: false
-                            }
-                        ]
-                    }
-                ); // End Call internalHighlighter 
-
-            } // End Function highlight
-
-        };
-        
-
-
-
-        function example()
-        {
-            var exampleSocket = new WebSocket("ws://localhost:57794/ws"); //, "protocolOne");
-
-            exampleSocket.onmessage = function (event)
-            {
-                console.log("onmessage", event);
-                console.log(event.data);
-
-                // exampleSocket.close();
-            };
-
-            exampleSocket.onopen = function (event)
-            {
-                exampleSocket.send("Here's some text that the server is urgently awaiting for !");
-            };
-        } // End Function example 
 
 
         function wsUrl(urlPart)
@@ -264,9 +108,52 @@
         } // End Function wsUrl 
 
 
+        function example()
+        {
+            let exampleSocket = new WebSocket(wsUrl("ws")); //, "protocolOne");
+
+            exampleSocket.onmessage = function (event)
+            {
+                console.log("onmessage", event);
+                console.log(event.data);
+
+                // exampleSocket.close();
+            };
+
+            exampleSocket.onopen = function (event)
+            {
+                exampleSocket.send("Here's some text that the server is urgently awaiting for !");
+            };
+        } // End Function example 
+
+
+        function thousandSeparator(x)
+        {
+            if (x == null)
+                return "";
+
+            let s = x.toString();
+            let i = s.indexOf(".");
+            let comma = "";
+
+            if (i != -1)
+            {
+                comma = s.substr(i);
+                s = s.substr(0, i);
+            }
+
+            s = s.replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+            s += comma;
+
+            return s;
+        } // End Function thousandSeparator 
+
+
         function startSearch()
         {
             let exampleSocket = new WebSocket(wsUrl("ransack")); //, "protocolOne");
+            let divResults = document.getElementById("divResults");
+            divResults.innerHTML = "";
 
             exampleSocket.onmessage = function (event)
             {
@@ -275,16 +162,24 @@
                 let fs = JSON.parse(event.data);
                 window.fs = fs;
                 
-                let divResults = document.getElementById("divResults");
-                divResults.innerHTML = "";
-                
-                
                 let info = document.createElement("div");
                 info.appendChild(
-                    document.createTextNode("Total Results: " + fs.length)
+                    document.createTextNode("Total Results: " + thousandSeparator(fs.length))
                 );
                 
                 divResults.appendChild(info);
+
+                let containingText = document.getElementById("txtContainingText");
+
+                let highlighter = new SearchTools.InstantSearch(document.body, [
+                    {
+                        token: containingText.value,
+                        className: "highlight",
+                        sensitiveSearch: false
+                    }
+                ]);
+                
+
 
                 let table = document.createElement("table");
                 
@@ -303,6 +198,7 @@
                         document.createTextNode(fs[i].Line)
                     );
                     tr.appendChild(td2);
+                    highlighter.highlightNode(td2);
 
                     table.appendChild(tr);
                 }
@@ -364,6 +260,10 @@
             background-color: whitesmoke;
         }
 
+
+        .highlight {
+            background-color: yellow;
+        }
 
     </style>
     

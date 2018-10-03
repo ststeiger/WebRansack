@@ -7,14 +7,26 @@ namespace WebRansack
         : System.IO.TextWriter
     {
 
-        System.Net.WebSockets.WebSocket m_webSocket;
-        System.Text.StringBuilder m_sb;
+        protected System.Net.WebSockets.WebSocket m_webSocket;
+        protected System.Text.StringBuilder m_sb;
+        protected System.IFormatProvider m_formatProvider;
+
+
+        public override System.IFormatProvider FormatProvider
+        {
+            get
+            {
+                return this.m_formatProvider;
+            }
+        }
 
 
         public WebSocketTextWriter()
         {
             this.m_sb = new System.Text.StringBuilder();
+            this.m_formatProvider = System.Globalization.CultureInfo.InvariantCulture;
         }
+
 
         public WebSocketTextWriter(System.Net.WebSockets.WebSocket webSocket)
             : this()
@@ -23,12 +35,20 @@ namespace WebRansack
         }
 
 
+
+
+
         public override void Write(char value)
         {
             this.m_sb.Append(value);
         }
 
 
+        public override void Write(string value)
+        {
+            this.m_sb.Append(value);
+        }
+        
         public override void Flush()
         {
             this.SendAsync(false).Wait();

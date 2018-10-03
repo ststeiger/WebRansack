@@ -51,11 +51,16 @@
         <legend>Main:</legend>
 
         <label class="lbl" for="txtFileName">File name</label>
-        <input class="txt" id="txtFileName" type="text" value="*.cs" />
+        <input class="txt" id="txtFileName" type="text" value="*.sql" />
+
+        <!--
+        <input class="txt" id="txtFileName" type="text" value="*.cs" />    
+        -->
+
         <br /><br />
         <label class="lbl" for="txtContainingText">Containing text</label>
         <input class="txt" id="txtContainingText" type="text" value="SELECT" />
-        <br /><br />s
+        <br /><br />
         <label class="lbl" for="txtLookIn">Look in</label>
         <!--
         <input class="txt" id="txtLookIn" type="text" value="D:\username\Documents\Visual Studio 2017\TFS\COR-Basic\COR-Basic\Basic\Basic" />
@@ -77,7 +82,12 @@
 
     <div style="clear: both;"></div>
 
-    <div id="divResults"></div>
+    <label for="clock" style="padding: 0.25cm;">Time elapsed:</label>
+    <div id="clock" style="display: inline; padding: 0.25cm;"></div>
+    <div style="clear: both;"></div>
+    <br />
+
+    <div id="divResults" style="padding: 0.25cm;"></div>
 
   
     <script type="text/javascript">
@@ -147,30 +157,86 @@
 
             return s;
         } // End Function thousandSeparator 
+        
+        
+        function startClock()
+        {
+            let clockElement = document.getElementById("clock");
+            let startTime = new Date();
+            // console.log("tick");
+            
+            let clock = window.setInterval(
+                function ()
+                {
+                    // console.log("tack");
+                    let elapsed = Math.round(((new Date()).getTime() - startTime.getTime())/1000.0);
+
+                    clockElement.innerHTML = "";
+                    clockElement.appendChild(
+                        document.createTextNode(elapsed)
+                    );
+
+                }, 1000
+            );
+            
+            return clock;
+        }
+
 
 
         function startSearch()
         {
+            // if ("WebSocket" in window) alert("WebSocket is supported by your Browser!");
+            
+            
+            let totalResults = [];
             let exampleSocket = new WebSocket(wsUrl("ransack")); //, "protocolOne");
+            let table = document.createElement("table");
             let divResults = document.getElementById("divResults");
             divResults.innerHTML = "";
+            divResults.appendChild(table);
+            
+            let clock = startClock();
+            
+            window.onbeforeunload = function() {
+                exampleSocket.onclose = function () {}; // disable onclose handler first
+                exampleSocket.close();
+            };
 
-            exampleSocket.onmessage = function (event)
-            {
-                console.log("onmessage", event);
-                console.log(event.data);
-                let fs = JSON.parse(event.data);
-                window.fs = fs;
+            exampleSocket.onerror = function(event) {
+                console.error("WebSocket error observed:", event);
+            };
+            
+            
+            exampleSocket.onclose = function(event) {
+                console.log('Web Socket Connection Closed');
+                window.clearInterval(clock);
+                console.log(event);
+                // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+                
+                // event.code 
+                // event.reason
+                // event.wasClean
+                // event.timeStamp
                 
                 let info = document.createElement("div");
                 info.appendChild(
-                    document.createTextNode("Total Results: " + thousandSeparator(fs.length))
+                    document.createTextNode("Total Results: " + thousandSeparator(totalResults.length))
                 );
                 
-                divResults.appendChild(info);
-
+                // divResults.appendChild(info);
+                divResults.insertBefore(info, divResults.firstChild);
+            };
+            
+            exampleSocket.onmessage = function (event)
+            {
+                console.log("onmessage", event);
+                // console.log(event.data);
+                
+                let fs = JSON.parse(event.data);
+                Array.prototype.push.apply(totalResults, fs);
+                
                 let containingText = document.getElementById("txtContainingText");
-
                 let highlighter = new SearchTools.InstantSearch(document.body, [
                     {
                         token: containingText.value,
@@ -178,10 +244,6 @@
                         sensitiveSearch: false
                     }
                 ]);
-                
-
-
-                let table = document.createElement("table");
                 
                 for (let i = 0; i < fs.length; ++i)
                 {
@@ -203,10 +265,8 @@
                     table.appendChild(tr);
                 }
                 
-                divResults.appendChild(table);
-
-                exampleSocket.close();
-                console.log("closed");
+                // exampleSocket.close();
+                // console.log("closed");
             };
 
             exampleSocket.onopen = function (event)
@@ -222,9 +282,8 @@
                     , "LookIn": lookIn.value
                     , "Subfolders": (subfolders.value == "checked")
                 };
-
-                console.log(searchSettings);
-
+                
+                console.log("searchSettings:", searchSettings);
                 exampleSocket.send( JSON.stringify(searchSettings) );
             };
         } // End function startSearch 
@@ -259,10 +318,38 @@
         tr:nth-child(2n+1) {
             background-color: whitesmoke;
         }
+        
+        
+        tr td{
+            height: auto;
+            overflow-wrap: break-word;
+        }
+        
+        
+        td:nth-child(1)
+        {
+            max-width: 500px;
+        }
 
 
+        body{
+            overflow-y: scroll;
+        }
+        
+        td:nth-child(2)
+        {
+            max-width: calc(100vw - 500px - 1.25cm);
+        }
+        
         .highlight {
             background-color: yellow;
+        }
+
+        input {
+            padding: 0.1cm;
+            padding-left: 0.25cm;
+            padding-right: 0.25cm;
+            font-size: 3.5mm;
         }
 
     </style>

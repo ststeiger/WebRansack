@@ -12,10 +12,11 @@ using Microsoft.Extensions.Logging;
 
 namespace WebRansack
 {
-    
+
     
     public class Program
     {
+
 
         // https://www.heroku.com/free
         // https://medium.com/@AndreyAzimov/how-free-heroku-really-works-and-how-to-get-maximum-from-it-daa53f2b3c57
@@ -53,7 +54,7 @@ namespace WebRansack
         }
 
 
-        public static async Task PeriodicTask(TimeSpan interval, System.Threading.CancellationToken cancellationToken)
+        public static async Task PeriodicTask(System.TimeSpan interval, System.Threading.CancellationToken cancellationToken)
         {
             using (System.Diagnostics.Process proc = System.Diagnostics.Process.GetCurrentProcess())
             {

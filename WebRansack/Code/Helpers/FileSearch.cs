@@ -29,6 +29,7 @@ namespace WebRansack
     {
         public string FileName;
         public string ContainingText;
+        public string ReplacementText;
         public string LookIn;
         public bool Subfolders;
     }
@@ -124,6 +125,71 @@ namespace WebRansack
                     } // Whend 
 
                 } // End Using reader
+
+            } // Next file 
+
+        } // End Function SearchContent 
+
+
+
+
+        public static System.Collections.Generic.IEnumerable<SearchResult> SearchAndReplace(SearchArguments searchArguments)
+        {
+            string modifiedFilesPath = @"D:\username\Desktop\Modified";
+
+            foreach (string file in System.IO.Directory.EnumerateFiles(searchArguments.LookIn, searchArguments.FileName, System.IO.SearchOption.AllDirectories))
+            {
+                string fileName = System.IO.Path.GetFileName(file);
+
+                string originalText = System.IO.File.ReadAllText(file);
+
+
+
+                int pos = originalText.IndexOf(searchArguments.ContainingText, System.StringComparison.Ordinal);
+                if (pos == -1)
+                    continue;
+
+
+
+                string newFileName = System.IO.Path.Combine(modifiedFilesPath, fileName);
+
+                using (System.IO.FileStream fs = new System.IO.FileStream(newFileName, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                {
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fs, System.Text.Encoding.UTF8))
+                    {
+                        // Warning: will report only first instance on LINE
+
+                        using (System.IO.StringReader reader = new System.IO.StringReader(originalText))
+                        {
+                            string line = null;
+
+                            for (int lineNumber = 1; (line = reader.ReadLine()) != null; ++lineNumber)
+                            {
+                                while ((pos = line.IndexOf(searchArguments.ContainingText, System.StringComparison.Ordinal)) != -1)
+                                {
+                                    yield return new SearchResult(file, line, lineNumber, pos);
+                                    line = line.Replace(searchArguments.ContainingText, searchArguments.ReplacementText); // Case-Sensitive ! 
+                                    // line = line.Replace(searchArguments.ContainingText, searchArguments.ReplacementText, System.StringComparison.Ordinal);
+                                } // Whend (pos != -1)
+
+                                sw.WriteLine(line);
+                            } // Whend 
+
+                        } // End Using reader
+
+                    } // End Using sw 
+
+                } // End Using fs
+
+
+
+                //pos = -1;
+                //System.Text.StringBuilder text = new System.Text.StringBuilder(originalText);
+                //while ((pos = text.IndexOf(searchArguments.ContainingText, 0, false)) != -1)
+                //{
+                //    text = text.Replace(searchArguments.ContainingText, searchArguments.ReplacementText);
+                //} // Whend 
+                // System.IO.File.WriteAllText(newFileName, text.ToString(), System.Text.Encoding.UTF8);
 
             } // Next file 
 

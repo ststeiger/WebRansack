@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29230.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRansack", "WebRansack\WebRansack.csproj", "{FDC3C722-159C-469E-91C9-DF3C55A8F496}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRansack", "WebRansack\WebRansack.csproj", "{FDC3C722-159C-469E-91C9-DF3C55A8F496}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLucene", "TestLucene\TestLucene.csproj", "{7F57DC73-E14D-4BAA-8E71-3B651B691911}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{FDC3C722-159C-469E-91C9-DF3C55A8F496}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDC3C722-159C-469E-91C9-DF3C55A8F496}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDC3C722-159C-469E-91C9-DF3C55A8F496}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F57DC73-E14D-4BAA-8E71-3B651B691911}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F57DC73-E14D-4BAA-8E71-3B651B691911}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F57DC73-E14D-4BAA-8E71-3B651B691911}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F57DC73-E14D-4BAA-8E71-3B651B691911}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

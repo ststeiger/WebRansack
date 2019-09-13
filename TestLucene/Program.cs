@@ -15,16 +15,18 @@ namespace TestLucene
         // http://texrights.org/2019/09/12/e-in-epo-for-extortion/
         static void Main(string[] args)
         {
-            TestFSE();
+            // TestFSE();
+            SimpleFileIndexer.Main1();
+            SimpleFileIndexer.Main2();
             
             System.Console.WriteLine(" --- Press any key to continue --- ");
             System.Console.ReadKey();
         } // End Sub Main 
-        
-        
+
+
         static void TestFSE()
         {
-            string path = @"C:\Users\Administrator\Downloads\Lucene_VS2012_Demo_App\Lucene\SimpleLuceneSearch";
+            string path = @"D:\Users\username\Downloads\Lucene_VS2012_Demo_App\Lucene\SimpleLuceneSearch";
             
             // System.IO.Directory.GetFileSystemEntries(path);
             System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(path);

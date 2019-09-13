@@ -6,6 +6,33 @@ namespace TestLucene
     public static class FileSystemInfoExtensions
     {
 
+        public static string Get32BitSystemDirectory()
+        {
+            // https://github.com/mholo65/WebTerm
+            // https://github.com/GoogleChromeLabs/carlo
+            // https://github.com/gkmo/CarloSharp
+            return Get32BitSystemDirectory(false);
+        }
+
+
+        public static string Get32BitSystemDirectory(bool placeInEnvironmentVariable)
+        {
+            string sysDir = "";
+
+            if (System.Environment.Is64BitOperatingSystem)
+                sysDir = System.Environment.ExpandEnvironmentVariables("%windir%\\SysWOW64");
+            else
+                sysDir = System.Environment.ExpandEnvironmentVariables("%windir%\\System32");
+
+            if (placeInEnvironmentVariable)
+                System.Environment.SetEnvironmentVariable(
+                    "SYSDIR32", sysDir, System.EnvironmentVariableTarget.User
+                );
+
+            return sysDir;
+        }
+
+
 
         public static bool IsDirectory(this System.IO.FileSystemInfo fi)
         {

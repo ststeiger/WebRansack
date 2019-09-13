@@ -20,7 +20,7 @@ namespace TestLucene
         { } // End Constructor 
 
 
-        public static void Main1(string[] args)
+        public static void Main1()
         {
             SimpleFileIndexer sfi = new SimpleFileIndexer();
             SimpleAnalyzer san = new SimpleAnalyzer(Lucene.Net.Util.LuceneVersion.LUCENE_48);
@@ -29,13 +29,10 @@ namespace TestLucene
             IndexWriter indexWriter = new IndexWriter(directory, writerConfig);
 
             sfi.CreateDocument(sfi.PopulateDatabase(), indexWriter);
-
-            System.Console.WriteLine(" --- Press any key to continue --- ");
-            System.Console.ReadKey();
         } // End Sub Main 
 
 
-        public static void Main2(string[] args)
+        public static void Main2()
         {
             // File indexDir = new File("/Users/abhinavjha/Documents/index");
             System.IO.DirectoryInfo dataDir = new System.IO.DirectoryInfo("/Users/abhinavjha/Documents/workspace");
@@ -56,6 +53,9 @@ namespace TestLucene
 
         private void IndexTheDataDirectory(IndexWriter indexWriter, System.IO.DirectoryInfo dataDir, string suffix)
         {
+            if (!dataDir.Exists)
+                return;
+
             System.IO.FileInfo[] files = dataDir.GetFiles();
             for (int i = 0; i < files.Length; i++)
             {
@@ -77,16 +77,16 @@ namespace TestLucene
         private System.Data.DataTable PopulateDatabase()
         {
             System.Data.DataTable dt = new System.Data.DataTable();
-
-            dt.Columns.Add("id", typeof(int));
-            dt.Columns.Add("appname", typeof(string));
+            
+            dt.Columns.Add("application_id", typeof(int));
+            dt.Columns.Add("application_name", typeof(string));
             dt.Columns.Add("notes", typeof(string));
 
             for (int i = 0; i < 10; ++i)
             {
                 System.Data.DataRow dr = dt.NewRow();
-                dr["id"] = i;
-                dr["appname"] ="Application #" + i.ToString();
+                dr["application_id"] = i;
+                dr["application_name"] ="Application #" + i.ToString();
                 dr["notes"] = "Note numer " + i.ToString();
 
                 dt.Rows.Add(dr);
@@ -133,7 +133,7 @@ namespace TestLucene
             System.Console.WriteLine("Indexing file " + f.FullName);
             CreateDocument((System.IO.FileInfo)f, indexWriter);
         } // End Sub IndexFileWithIndexWriter 
-
+       
 
         private void CreateDocument(System.Data.DataTable dt, IndexWriter indexWriter)
         {

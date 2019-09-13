@@ -29,6 +29,9 @@ namespace TestLucene
                     "SYSDIR32", sysDir, System.EnvironmentVariableTarget.User
                 );
 
+            // C:\Windows\SysWOW64
+            // C:\Windows\System32
+
             return sysDir;
         }
 

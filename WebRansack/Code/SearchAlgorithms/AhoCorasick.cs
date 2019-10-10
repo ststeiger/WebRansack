@@ -20,17 +20,19 @@
 // THE SOFTWARE.
 
 
-namespace AhoCorasick
+namespace WebRansack.SearchAlgorithms.AhoCorasick 
 {
+
 
     // https://github.com/pdonald/aho-corasick
     // https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm
     public class Test
     {
 
+
         public static void Me()
         {
-            AhoCorasick.Trie trie = new AhoCorasick.Trie();
+            Trie trie = new Trie();
 
             // add words
             trie.Add("hello");
@@ -45,9 +47,12 @@ namespace AhoCorasick
             foreach (string word in trie.Find(text))
             {
                 System.Console.WriteLine(word);
-            }
-        }
-    }
+            } // Next word 
+
+        } // End Sub Me 
+
+
+    } // End Class Test 
 
 
     /// <summary>
@@ -63,7 +68,8 @@ namespace AhoCorasick
         public void Add(string s)
         {
             Add(s, s);
-        }
+        } // End Sub Add 
+
 
         /// <summary>
         /// Adds multiple strings.
@@ -74,10 +80,15 @@ namespace AhoCorasick
             foreach (string s in strings)
             {
                 Add(s);
-            }
-        }
-    }
+            } // Next s 
 
+        } // End Sub Add 
+
+
+    } // End Class Trie:Trie<string> 
+
+
+    
 
     /// <summary>
     /// Trie that will find strings in a text and return values of type <typeparamref name="T"/>
@@ -85,9 +96,9 @@ namespace AhoCorasick
     /// </summary>
     /// <typeparam name="TValue">Value type.</typeparam>
     public class Trie<TValue> : Trie<char, TValue>
-    { }
+    { } // End Class Trie<TValue>:Trie<char, TValue>
 
-
+    
     /// <summary>
     /// Trie that will find strings or phrases and return values of type <typeparamref name="T"/>
     /// for each string or phrase found.
@@ -104,6 +115,7 @@ namespace AhoCorasick
         /// Root of the trie. It has no value and no parent.
         /// </summary>
         private readonly Node<T, TValue> root = new Node<T, TValue>();
+
 
         /// <summary>
         /// Adds a word to the tree.
@@ -131,12 +143,12 @@ namespace AhoCorasick
                     child = node[c] = new Node<T, TValue>(c, node);
 
                 node = child;
-            }
+            } // Next c 
 
             // mark the end of the branch
             // by adding a value that will be returned when this word is found in a text
             node.Values.Add(value);
-        }
+        } // End Sub Add 
 
 
         /// <summary>
@@ -163,7 +175,7 @@ namespace AhoCorasick
                 {
                     root.Fail = root;
                     continue;
-                }
+                } // End if (node == root) 
 
                 Node<T, TValue> fail = node.Parent.Fail;
 
@@ -173,8 +185,10 @@ namespace AhoCorasick
                 node.Fail = fail[node.Word] ?? root;
                 if (node.Fail == node)
                     node.Fail = root;
-            }
-        }
+            } // Whend 
+
+        } // End Sub Build 
+
 
         /// <summary>
         /// Finds all added words in a text.
@@ -197,9 +211,12 @@ namespace AhoCorasick
                 {
                     foreach (TValue value in t.Values)
                         yield return value;
-                }
-            }
-        }
+                } // Next t 
+
+            } // Next c 
+
+        } // End Function Find 
+
 
         /// <summary>
         /// Node in a trie.
@@ -222,8 +239,8 @@ namespace AhoCorasick
             /// Constructor for the root node.
             /// </summary>
             public Node()
-            {
-            }
+            { } // End Constructor 
+
 
             /// <summary>
             /// Constructor for a node with a word
@@ -234,7 +251,8 @@ namespace AhoCorasick
             {
                 this.word = word;
                 this.parent = parent;
-            }
+            } // End Constructor 
+
 
             /// <summary>
             /// Word (or letter) for this node.
@@ -244,6 +262,7 @@ namespace AhoCorasick
                 get { return word; }
             }
 
+
             /// <summary>
             /// Parent node.
             /// </summary>
@@ -251,6 +270,7 @@ namespace AhoCorasick
             {
                 get { return parent; }
             }
+
 
             /// <summary>
             /// Fail or fall node.
@@ -260,6 +280,7 @@ namespace AhoCorasick
                 get;
                 set;
             }
+
 
             /// <summary>
             /// Children for this node.
@@ -272,6 +293,7 @@ namespace AhoCorasick
                 set { children[c] = value; }
             }
 
+
             /// <summary>
             /// Values for words that end at this node.
             /// </summary>
@@ -280,11 +302,13 @@ namespace AhoCorasick
                 get { return values; }
             }
 
+
             /// <inherit/>
             public System.Collections.Generic.IEnumerator<Node<TNode, TNodeValue>> GetEnumerator()
             {
                 return children.Values.GetEnumerator();
             }
+
 
             /// <inherit/>
             System.Collections.IEnumerator
@@ -293,11 +317,18 @@ namespace AhoCorasick
                 return GetEnumerator();
             }
 
+
             /// <inherit/>
             public override string ToString()
             {
                 return Word.ToString();
-            }
-        }
-    }
-}
+            } // End Function ToString 
+
+
+        } // End Class Node 
+
+
+    } // End Class Trie<T, TValue>:Trie<T, TValue> 
+
+
+} // End Namespace AhoCorasick 

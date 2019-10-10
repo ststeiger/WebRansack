@@ -1,5 +1,5 @@
 ﻿
-namespace WebRansack.Code.SearchAlgorithms
+namespace WebRansack.SearchAlgorithms
 {
 
 
@@ -51,10 +51,10 @@ namespace WebRansack.Code.SearchAlgorithms
                 {
                     s += System.Math.Max(1, j - badChar[str[s + j]]);
                 }
-            }
+            } // Whend 
 
             return retVal.ToArray();
-        }
+        } // End Function SearchString 
 
 
         private static void BadCharHeuristic(string str, int size, ref int[] badChar)
@@ -66,10 +66,10 @@ namespace WebRansack.Code.SearchAlgorithms
 
             for (i = 0; i < size; i++)
                 badChar[(int)str[i]] = i;
-        }
+        } // End Sub BadCharHeuristic 
 
 
-    }
+    } // End Class BoyerMoore 
 
 
-}
+} // End Namespace WebRansack.SearchAlgorithms 

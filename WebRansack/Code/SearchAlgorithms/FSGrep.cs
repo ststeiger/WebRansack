@@ -1,5 +1,5 @@
 ﻿
-namespace WebRansack.Code.SearchAlgorithms
+namespace WebRansack.SearchAlgorithms
 {
 
 
@@ -81,10 +81,10 @@ namespace WebRansack.Code.SearchAlgorithms
                 return string.Format("--file {0}:{1}", FilePath, LineNumber);
             }
 
-        }
+        } // End Class Result 
 
 
-    }
+    } // End Class FSGrep 
 
 
-}
+} // End Namespace WebRansack.Code.SearchAlgorithms 

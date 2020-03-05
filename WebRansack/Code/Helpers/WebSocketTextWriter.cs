@@ -12,6 +12,8 @@ namespace WebRansack
         protected System.Text.StringBuilder m_sb;
         protected System.IFormatProvider m_formatProvider;
 
+        protected byte[] m_emptyByteArray;
+
 
         public override System.IFormatProvider FormatProvider
         {
@@ -26,6 +28,7 @@ namespace WebRansack
         {
             this.m_sb = new System.Text.StringBuilder();
             this.m_formatProvider = System.Globalization.CultureInfo.InvariantCulture;
+            this.m_emptyByteArray = new byte[0];
         }
 
 
@@ -49,7 +52,7 @@ namespace WebRansack
         {
             this.m_sb.Append(value);
         }
-        
+
         public override void Flush()
         {
             this.SendAsync(false).Wait();
@@ -62,10 +65,10 @@ namespace WebRansack
         }
 
 
-        public void Transmit()
-        {
-            this.SendAsync(true).Wait();
-        }
+        //public void Transmit()
+        //{
+        //    this.SendAsync(true).Wait();
+        //}
 
 
         public async System.Threading.Tasks.Task TransmitAsync()
@@ -82,6 +85,12 @@ namespace WebRansack
 
         public async System.Threading.Tasks.Task SendAsync(bool endTransmission)
         {
+            if (this.m_sb.Length < 1)
+            {
+                await this.SendAsync(endTransmission, this.m_emptyByteArray);
+                return;
+            }
+
             string answer = this.m_sb.ToString();
             this.m_sb.Clear();
 

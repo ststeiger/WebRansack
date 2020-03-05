@@ -37,20 +37,20 @@ namespace WebRansack
                 //    , false, System.Threading.CancellationToken.None
                 //);
 
-                wtw.WriteLine("Test 123");
-                wtw.Transmit();
-                await System.Threading.Tasks.Task.Delay(30);
+                //wtw.WriteLine("Test 123");
+                //wtw.Transmit();
+                //await System.Threading.Tasks.Task.Delay(30);
                 
 
 
-                await SqlServiceJsonHelper.AnyDataReaderToJson("SELECT DB_Name(), * FROM T_Benutzer", null, service, wtw, RenderType_t.DataTable);
-                wtw.Transmit();
+                await SqlServiceJsonHelper.AnyDataReaderToJson("SELECT * FROM T_Benutzer", null, service, wtw, RenderType_t.DataTable);
+                await wtw.TransmitAsync();
 
 
-                await System.Threading.Tasks.Task.Delay(3000);
-                wtw.WriteLine("Test 456");
-                wtw.Transmit();
-                await System.Threading.Tasks.Task.Delay(30);
+                //await System.Threading.Tasks.Task.Delay(3000);
+                //wtw.WriteLine("Test 456");
+                //wtw.Transmit();
+                //await System.Threading.Tasks.Task.Delay(30);
 
 
                 //using (Newtonsoft.Json.JsonTextWriter jsonWriter =
@@ -58,14 +58,6 @@ namespace WebRansack
                 //{
 
                 //}
-
-
-                await webSocket.SendAsync(
-                    new System.ArraySegment<byte>(buffer, 0, result.Count)
-                    , result.MessageType
-                    , result.EndOfMessage
-                    , System.Threading.CancellationToken.None
-                );
 
                 result = await webSocket.ReceiveAsync(
                     new System.ArraySegment<byte>(buffer)

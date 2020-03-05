@@ -36,15 +36,15 @@ namespace WebRansack
                 //);
 
                 wtw.WriteLine("Test 123");
-                wtw.Transmit();
+                await wtw.TransmitAsync();
                 wtw.WriteLine("Test 456");
-                wtw.Transmit();
+                await wtw.TransmitAsync();
 
                 wtw.WriteLine("Echo: ");
-                wtw.Flush();
+                await wtw.FlushAsync();
 
                 wtw.Write(@"The server received the following message: ");
-                wtw.Flush();
+                await wtw.FlushAsync();
 
                 // wtw.Send(false, new byte[0]);
 

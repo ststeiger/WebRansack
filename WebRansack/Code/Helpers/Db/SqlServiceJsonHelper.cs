@@ -214,7 +214,7 @@ namespace WebRansack
                                 } // End if (!format.HasFlag(RenderType_t.Data_Only))
 
 
-                                output.Transmit();
+                                await output.TransmitAsync();
 
                                 await jsonWriter.WriteStartArrayAsync();
 
@@ -229,6 +229,8 @@ namespace WebRansack
                                             columns[i] = dr.GetName(i);
                                         } // Next i 
                                     } // End if (format.HasFlag(RenderType_t.DataTable)) 
+
+                                    int rowCount = 0;
 
                                     while (await dr.ReadAsync())
                                     {
@@ -256,9 +258,21 @@ namespace WebRansack
                                         else
                                             await jsonWriter.WriteEndArrayAsync();
 
-                                        output.Transmit();
+                                        rowCount++;
+
+                                        await jsonWriter.FlushAsync();
+                                        
+                                        if (rowCount % 5 == 0)
+                                        {
+                                            await output.TransmitAsync();
+                                        }
+                                        else
+                                            await output.FlushAsync();
+
                                     } // Whend 
 
+                                    await jsonWriter.FlushAsync();
+                                    await output.TransmitAsync();
                                 } // End if (dr.HasRows) 
 
                                 await jsonWriter.WriteEndArrayAsync();
@@ -269,15 +283,24 @@ namespace WebRansack
                                     await jsonWriter.WriteEndObjectAsync();
                                 } // End if (!format.HasFlag(RenderType_t.Data_Only)) 
 
-                                output.Transmit();
+                                
                             } while (await dr.NextResultAsync());
 
                             await jsonWriter.WriteEndArrayAsync();
                             await jsonWriter.WriteEndObjectAsync();
 
-                            await jsonWriter.FlushAsync();
-                            await output.FlushAsync();
-                            output.Transmit();
+                            try
+                            {
+
+                                await jsonWriter.FlushAsync();
+                                await output.FlushAsync();
+                            }
+                            catch (System.Exception ex)
+                            {
+                                System.Console.WriteLine(ex.Message);
+                            }
+
+                            await output.TransmitAsync();
                         } // jsonWriter 
 
                     } // dr 

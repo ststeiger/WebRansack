@@ -71,72 +71,66 @@
         } // End Function wsUrl 
 
 
+        function isJson(str)
+        {
+            try
+            {
+                JSON.parse(str);
+            } catch (e)
+            {
+                return false;
+            }
+            return true;
+        }
+
+
         function example()
         {
             let exampleSocket = new WebSocket(wsUrl("table")); //, "protocolOne");
 
+            window.onbeforeunload = function ()
+            {
+                exampleSocket.onclose = function () { }; // disable onclose handler first
+                exampleSocket.close();
+            };
+
             exampleSocket.onmessage = function (event)
             {
                 console.log("onmessage", event);
-                console.log(event.data);
+                console.log("ed", event.data);
+
+
+
+                // JSON.parse(event.data);
 
                 // exampleSocket.close();
             };
 
             exampleSocket.onopen = function (event)
             {
+                // var searchSettings = {};
+                // exampleSocket.send(JSON.stringify(searchSettings));
                 exampleSocket.send("Here's some text that the server is urgently awaiting for !");
             };
-        } // End Function example 
 
-        
-        
-        function startSearch()
-        {
-            // if ("WebSocket" in window) alert("WebSocket is supported by your Browser!");
-            
-            window.onbeforeunload = function() {
-                exampleSocket.onclose = function () {}; // disable onclose handler first
-                exampleSocket.close();
-            };
-            
-            exampleSocket.onerror = function(event) {
+
+            exampleSocket.onerror = function (event)
+            {
                 console.error("WebSocket error observed:", event);
             };
-            
-            
-            exampleSocket.onclose = function(event) {
+
+            exampleSocket.onclose = function (event)
+            {
                 console.log('Web Socket Connection Closed');
-                
-                console.log(event);
                 // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
-                
-                // event.code 
+                console.log(event);
+                                // event.code 
                 // event.reason
                 // event.wasClean
                 // event.timeStamp
-                
-            };
-            
-            exampleSocket.onmessage = function (event)
-            {
-                console.log("onmessage", event);
-                // console.log(event.data);
-                
-                let fs = JSON.parse(event.data);
-                console.log(fs);
-                
-                // exampleSocket.close();
-                // console.log("closed");
             };
 
-            exampleSocket.onopen = function (event)
-            {
-                // console.log("searchSettings:", searchSettings);
-                var searchSettings = {};
-                exampleSocket.send( JSON.stringify(searchSettings) );
-            };
-        } // End function startSearch 
+        } // End Function example 
 
         example();
         

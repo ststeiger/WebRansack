@@ -22,8 +22,10 @@ namespace WebRansack
                 new System.ArraySegment<byte>(buffer)
                 , System.Threading.CancellationToken.None
             );
-            
-            
+
+
+            SqlService service = (SqlService)context.RequestServices.GetService(typeof(SqlService));
+
             while (!result.CloseStatus.HasValue)
             {
                 //string answer = @"The server received the following message: ";
@@ -37,30 +39,26 @@ namespace WebRansack
 
                 wtw.WriteLine("Test 123");
                 wtw.Transmit();
-                await System.Threading.Tasks.Task.Delay(3000);
+                await System.Threading.Tasks.Task.Delay(30);
                 
+
+
+                await SqlServiceJsonHelper.AnyDataReaderToJson("SELECT DB_Name(), * FROM T_Benutzer", null, service, wtw, RenderType_t.DataTable);
+                wtw.Transmit();
+
+
+                await System.Threading.Tasks.Task.Delay(3000);
                 wtw.WriteLine("Test 456");
                 wtw.Transmit();
-                await System.Threading.Tasks.Task.Delay(3000);
+                await System.Threading.Tasks.Task.Delay(30);
 
 
-                using (Newtonsoft.Json.JsonTextWriter jsonWriter =
-                    new Newtonsoft.Json.JsonTextWriter(wtw))
-                {
-                    
-                }
+                //using (Newtonsoft.Json.JsonTextWriter jsonWriter =
+                //    new Newtonsoft.Json.JsonTextWriter(wtw))
+                //{
 
+                //}
 
-
-
-                wtw.WriteLine("Echo: ");
-                wtw.Flush();
-                await System.Threading.Tasks.Task.Delay(3000);
-                
-                wtw.Write(@"The server received the following message: ");
-                wtw.Flush();
-                await System.Threading.Tasks.Task.Delay(3000);
-                // wtw.Send(false, new byte[0]);
 
                 await webSocket.SendAsync(
                     new System.ArraySegment<byte>(buffer, 0, result.Count)

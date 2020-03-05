@@ -3,6 +3,7 @@ namespace WebRansack
 {
 
 
+
     public class WebSocketTextWriter 
         : System.IO.TextWriter
     {

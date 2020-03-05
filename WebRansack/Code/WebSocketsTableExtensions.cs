@@ -6,12 +6,12 @@ namespace WebRansack
 {
 
 
-    public static class WebSocketsEchoExtensions
+    public static class WebSocketsTableExtensions
     {
 
 
         // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/websockets?view=aspnetcore-2.1
-        private static async System.Threading.Tasks.Task Echo(
+        private static async System.Threading.Tasks.Task GetTableAsync(
               Microsoft.AspNetCore.Http.HttpContext context
             , System.Net.WebSockets.WebSocket webSocket)
         {
@@ -22,8 +22,8 @@ namespace WebRansack
                 new System.ArraySegment<byte>(buffer)
                 , System.Threading.CancellationToken.None
             );
-
-
+            
+            
             while (!result.CloseStatus.HasValue)
             {
                 //string answer = @"The server received the following message: ";
@@ -37,15 +37,29 @@ namespace WebRansack
 
                 wtw.WriteLine("Test 123");
                 wtw.Transmit();
+                await System.Threading.Tasks.Task.Delay(3000);
+                
                 wtw.WriteLine("Test 456");
                 wtw.Transmit();
+                await System.Threading.Tasks.Task.Delay(3000);
+
+
+                using (Newtonsoft.Json.JsonTextWriter jsonWriter =
+                    new Newtonsoft.Json.JsonTextWriter(wtw))
+                {
+                    
+                }
+
+
+
 
                 wtw.WriteLine("Echo: ");
                 wtw.Flush();
-
+                await System.Threading.Tasks.Task.Delay(3000);
+                
                 wtw.Write(@"The server received the following message: ");
                 wtw.Flush();
-
+                await System.Threading.Tasks.Task.Delay(3000);
                 // wtw.Send(false, new byte[0]);
 
                 await webSocket.SendAsync(
@@ -62,19 +76,21 @@ namespace WebRansack
             } // Whend 
 
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, System.Threading.CancellationToken.None);
-        } // End Task Echo 
-
-
-        public static void UseEcho(this Microsoft.AspNetCore.Builder.IApplicationBuilder app)
+        } // End Task GetTableAsync 
+        
+        
+        public static void UseTable(this Microsoft.AspNetCore.Builder.IApplicationBuilder app, string path)
         {
+            Microsoft.AspNetCore.Http.PathString ps = new Microsoft.AspNetCore.Http.PathString(path);
+            
             app.Use(async (context, next) =>
             {
-                if (context.Request.Path == "/ws")
+                if (context.Request.Path == ps)
                 {
                     if (context.WebSockets.IsWebSocketRequest)
                     {
                         System.Net.WebSockets.WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                        await Echo(context, webSocket);
+                        await GetTableAsync(context, webSocket);
                     }
                     else
                     {
@@ -90,7 +106,7 @@ namespace WebRansack
         } // End Sub UseEcho 
 
 
-    } // End Class WebSocketsEchoExtensions 
+    } // End Class WebSocketsTableExtensions 
 
 
 } // End Namespace WebRansack 

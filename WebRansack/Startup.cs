@@ -77,8 +77,9 @@ namespace WebRansack
             app.UseOpenFolderOrFileExtensions("/OpenFolder");
             app.UseRansackSearch("/ransack");
             app.UseRansackSearchAndReplace("/sar");
-
-
+            app.UseTable("/table");
+            
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

@@ -293,14 +293,13 @@ namespace WebRansack
                             {
 
                                 await jsonWriter.FlushAsync();
-                                await output.FlushAsync();
+                                await output.TransmitAsync();
                             }
                             catch (System.Exception ex)
                             {
                                 System.Console.WriteLine(ex.Message);
                             }
 
-                            await output.TransmitAsync();
                         } // jsonWriter 
 
                     } // dr 

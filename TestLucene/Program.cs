@@ -15,6 +15,8 @@ namespace TestLucene
         // http://texrights.org/2019/09/12/e-in-epo-for-extortion/
         static void Main(string[] args)
         {
+            FileSearch.IndexedSearch.Test();
+
             TestJsonGeneration().Wait();
 
             // TestFSE();
@@ -24,6 +26,22 @@ namespace TestLucene
             System.Console.WriteLine(" --- Press any key to continue --- ");
             System.Console.ReadKey();
         } // End Sub Main 
+
+
+
+
+
+        public static void TestCompleteness()
+        {
+            string path = @"D:\username\Desktop\DesktopArchiv";
+
+            // FileSearch.Iterative.IterativeSearch1("");
+            System.Collections.Generic.List<string> ls = FileSearch.Recursive.RecursiveSearch2(path);
+            string[] arr = System.IO.Directory.GetFiles(path, "*.*", System.IO.SearchOption.AllDirectories);
+
+            System.Console.WriteLine(ls.Count);
+            System.Console.WriteLine(arr.Length);
+        }
 
 
         public static async System.Threading.Tasks.Task TestJsonGeneration2()

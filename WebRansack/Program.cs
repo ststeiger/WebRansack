@@ -1,13 +1,8 @@
 ﻿
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+// using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting; // for UseStartup
+// using Microsoft.Extensions.Configuration;
+// using Microsoft.Extensions.Logging;
 
 
 namespace WebRansack
@@ -38,7 +33,7 @@ namespace WebRansack
         //    <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
         //    <ServerGarbageCollection>false</ServerGarbageCollection>
         // </PropertyGroup>
-        public static async Task GetProcess(System.Diagnostics.Process proc)
+        public static async System.Threading.Tasks.Task GetProcess(System.Diagnostics.Process proc)
         {
             // https://stackoverflow.com/questions/47656988/viewing-memory-usage-stats-of-a-dotnetcore-2-self-contained-application-on-linux
             long currentMemoryUsage = proc.WorkingSet64;
@@ -50,11 +45,11 @@ namespace WebRansack
             System.Console.WriteLine("Current: " + currentMemoryUsage.ToString(System.Globalization.CultureInfo.InvariantCulture) + "MB");
             System.Console.WriteLine("Peak: " + peakPhysicalMemoryUsage.ToString(System.Globalization.CultureInfo.InvariantCulture) + "MB");
             
-            await Task.CompletedTask;
+            await System.Threading.Tasks.Task.CompletedTask;
         }
 
 
-        public static async Task PeriodicTask(System.TimeSpan interval, System.Threading.CancellationToken cancellationToken)
+        public static async System.Threading.Tasks.Task PeriodicTask(System.TimeSpan interval, System.Threading.CancellationToken cancellationToken)
         {
             using (System.Diagnostics.Process proc = System.Diagnostics.Process.GetCurrentProcess())
             {
@@ -62,21 +57,20 @@ namespace WebRansack
                 while (true)
                 {
                     await GetProcess(proc);
-                    await Task.Delay(interval, cancellationToken);
+                    await System.Threading.Tasks.Task.Delay(interval, cancellationToken);
                 }
 
             }
         }
-
-
-        public static async Task PeriodicTask(int interval, System.Threading.CancellationToken cancellationToken)
+        
+        
+        public static async System.Threading.Tasks.Task PeriodicTask(int interval, System.Threading.CancellationToken cancellationToken)
         {
             System.TimeSpan ts = new System.TimeSpan(0, 0, interval);
             await PeriodicTask(ts, cancellationToken);
         }
-
-
-
+        
+        
         public static void Main(string[] args)
         {
             _ = PeriodicTask(10, System.Threading.CancellationToken.None);
@@ -84,9 +78,9 @@ namespace WebRansack
         }
         
         
-        public static IWebHost BuildWebHost(string[] args)
+        public static Microsoft.AspNetCore.Hosting.IWebHost BuildWebHost(string[] args)
         {
-            return WebHost.CreateDefaultBuilder(args)
+            return Microsoft.AspNetCore.WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .Build();            
         }

@@ -100,7 +100,16 @@ namespace TestLucene.FileSearch
             if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
                 return System.Environment.ExpandEnvironmentVariables("$HOME");
 
-            return System.Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+            // return System.Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"); // Z:
+            // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile); // C:\Users
+            // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.History); // C:/...
+            // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+            // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
+            // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+
+            return System.IO.Path.GetFullPath(
+                System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "..")
+            );
         }
 
 
@@ -168,6 +177,10 @@ namespace TestLucene.FileSearch
 
         public static void Test()
         {
+            string ghc = GetHomeDirectory();
+            System.Console.WriteLine(ghc);
+
+
             // IndexFiles();
             // SearchPath(@"15-03-_2018_13-49-43.png");
 

@@ -15,6 +15,8 @@ namespace TestLucene
         // http://texrights.org/2019/09/12/e-in-epo-for-extortion/
         static void Main(string[] args)
         {
+            // System.Console.WriteLine(new System.Globalization.CultureInfo("ru-ru").TextInfo.ListSeparator);
+
             FileSearch.IndexedSearch.Test();
             
             // TestJsonGeneration().Wait();

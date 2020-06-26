@@ -1,4 +1,7 @@
 ﻿
+using System;
+using System.IO;
+
 namespace TestLucene.FileSearch
 {
 
@@ -14,8 +17,7 @@ namespace TestLucene.FileSearch
 
             if (num < 1)
                 return new string[0];
-
-
+            
             System.Collections.Generic.IEnumerable<Lucene.Net.Index.IIndexableField> fields = r.Document(0).Fields;
             
             int i = 0;
@@ -96,18 +98,35 @@ namespace TestLucene.FileSearch
         } // End Sub BuildIndex 
 
 
+        public static string GetHomeDirectory()
+        {
+            if(System.Environment.OSVersion.Platform == PlatformID.Unix)
+                return System.Environment.ExpandEnvironmentVariables("$HOME");
+            
+            return System.Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+        }
+
+
         public static void BuildIndex()
         {
             string path = @"D:\username\Desktop\DesktopArchiv";
             string indexPath = @"D:\lol\lucene";
-            System.Collections.Generic.IEnumerable<string> files = System.IO.Directory.EnumerateFiles(path, "*.*", System.IO.SearchOption.AllDirectories);
 
+            indexPath = System.IO.Path.Combine(GetHomeDirectory(), ".Lucene", "TestIndex");
+
+            System.Collections.Generic.IEnumerable<string> all_files = System.Linq.Enumerable.Empty<string>();
+            System.Collections.Generic.IEnumerable<string> files =
+                System.IO.Directory.EnumerateFiles(path, "*.*", System.IO.SearchOption.AllDirectories);
+
+            all_files = System.Linq.Enumerable.Concat(all_files, files);
+
+            
             // foreach (string s in files) System.Console.WriteLine(s);
-
+            
             BuildIndex(indexPath, files);
         } // End Sub BuildIndex 
-
-
+        
+        
         // https://lucenenet.apache.org/
         // https://www.codeproject.com/Articles/609980/Small-Lucene-NET-Demo-App
         // https://stackoverflow.com/questions/12600196/lucene-how-to-index-file-names
@@ -115,16 +134,14 @@ namespace TestLucene.FileSearch
         {
             Lucene.Net.Util.LuceneVersion version = Lucene.Net.Util.LuceneVersion.LUCENE_48;
             Lucene.Net.Store.Directory luceneIndexDirectory = Lucene.Net.Store.FSDirectory.Open(indexPath);
-
+            
             Lucene.Net.Index.IndexReader r = Lucene.Net.Index.DirectoryReader.Open(luceneIndexDirectory);
-
-
-
+            
             Lucene.Net.Search.IndexSearcher searcher = new Lucene.Net.Search.IndexSearcher(r);
             Lucene.Net.Analysis.Analyzer analyzer = GetWrappedAnalyzer();
-
+            
             Lucene.Net.QueryParsers.Classic.QueryParser parser = new Lucene.Net.QueryParsers.Classic.QueryParser(version, "file_name", analyzer);
-
+            
             // https://stackoverflow.com/questions/15170097/how-to-search-across-all-the-fields
             // Lucene.Net.QueryParsers.Classic.MultiFieldQueryParser parser = new Lucene.Net.QueryParsers.Classic.MultiFieldQueryParser(version, GetFields(r), analyzer);
 
@@ -155,7 +172,32 @@ namespace TestLucene.FileSearch
         public static void Test()
         {
             // IndexFiles();
-            SearchPath(@"15-03-_2018_13-49-43.png");
+            // SearchPath(@"15-03-_2018_13-49-43.png");
+            
+            System.IO.DriveInfo[] dvs = System.IO.DriveInfo.GetDrives();
+            foreach (System.IO.DriveInfo dvi in dvs)
+            {
+                if(dvi.DriveType != DriveType.Fixed)
+                    continue;
+                
+                if(dvi.TotalSize == 0)
+                    continue;
+                
+                if (dvi.RootDirectory == null 
+                    || dvi.RootDirectory.FullName.StartsWith("/snap", StringComparison.InvariantCultureIgnoreCase)
+                    || dvi.RootDirectory.FullName.StartsWith("/boot", StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+                
+                System.Console.WriteLine(dvi.DriveType);
+                System.Console.WriteLine(dvi.DriveFormat);
+                System.Console.WriteLine(dvi.AvailableFreeSpace);
+                System.Console.WriteLine(dvi.TotalSize);
+                System.Console.WriteLine(dvi.TotalFreeSpace);
+                System.Console.WriteLine(dvi.RootDirectory);
+            }
+            
+            System.Console.WriteLine("That's all !");
+            
         } // End Sub Test 
 
 

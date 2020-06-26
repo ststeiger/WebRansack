@@ -16,12 +16,12 @@ namespace TestLucene
         static void Main(string[] args)
         {
             FileSearch.IndexedSearch.Test();
-
-            TestJsonGeneration().Wait();
-
+            
+            // TestJsonGeneration().Wait();
+            
             // TestFSE();
-            SimpleFileIndexer.Main1();
-            SimpleFileIndexer.Main2();
+            // SimpleFileIndexer.Main1();
+            // SimpleFileIndexer.Main2();
 
             System.Console.WriteLine(" --- Press any key to continue --- ");
             System.Console.ReadKey();

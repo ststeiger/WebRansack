@@ -1,8 +1,39 @@
 ﻿
+using HtmlAgilityPack;
+
 namespace TestLucene.FileSearch
 {
     class HtmlSearch
     {
+
+        public static void foo(HtmlDocument doc)
+        {
+            var root = doc.DocumentNode;
+            var sb = new System.Text.StringBuilder();
+            foreach (var node in root.DescendantNodesAndSelf())
+            {
+                if (!node.HasChildNodes)
+                {
+                    string text = node.InnerText;
+                    if (!string.IsNullOrEmpty(text))
+                        sb.AppendLine(text.Trim());
+                }
+            }
+        }
+
+
+        // https://stackoverflow.com/questions/4182594/grab-all-text-from-html-with-html-agility-pack
+        public static void Extract()
+        {
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(@"<html><body><p>foo <a href='http://www.example.com'>bar</a> baz</p></body></html>");
+
+            foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//text()"))
+            {
+                System.Console.WriteLine("text=" + node.InnerText);
+            }
+        }
+
     }
 
 

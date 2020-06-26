@@ -1,7 +1,4 @@
 ﻿
-using System;
-using System.IO;
-
 namespace TestLucene.FileSearch
 {
 
@@ -17,9 +14,9 @@ namespace TestLucene.FileSearch
 
             if (num < 1)
                 return new string[0];
-            
+
             System.Collections.Generic.IEnumerable<Lucene.Net.Index.IIndexableField> fields = r.Document(0).Fields;
-            
+
             int i = 0;
             string[] fieldList = new string[System.Linq.Enumerable.Count(fields)];
             foreach (Lucene.Net.Index.IIndexableField thisField in fields)
@@ -80,11 +77,11 @@ namespace TestLucene.FileSearch
 
 
                     // StringField indexes but doesn't tokenize
-                    doc.Add(new Lucene.Net.Documents.StringField("full_name", thisValue, Lucene.Net.Documents.Field.Store.YES)); 
-                    doc.Add(new Lucene.Net.Documents.StringField("directory_name", directory_name, Lucene.Net.Documents.Field.Store.YES)); 
-                    doc.Add(new Lucene.Net.Documents.StringField("file_name", file_name, Lucene.Net.Documents.Field.Store.YES)); 
-                    doc.Add(new Lucene.Net.Documents.StringField("filename_no_extension", filename_no_extension, Lucene.Net.Documents.Field.Store.YES)); 
-                    doc.Add(new Lucene.Net.Documents.StringField("extension", extension, Lucene.Net.Documents.Field.Store.YES)); 
+                    doc.Add(new Lucene.Net.Documents.StringField("full_name", thisValue, Lucene.Net.Documents.Field.Store.YES));
+                    doc.Add(new Lucene.Net.Documents.StringField("directory_name", directory_name, Lucene.Net.Documents.Field.Store.YES));
+                    doc.Add(new Lucene.Net.Documents.StringField("file_name", file_name, Lucene.Net.Documents.Field.Store.YES));
+                    doc.Add(new Lucene.Net.Documents.StringField("filename_no_extension", filename_no_extension, Lucene.Net.Documents.Field.Store.YES));
+                    doc.Add(new Lucene.Net.Documents.StringField("extension", extension, Lucene.Net.Documents.Field.Store.YES));
                     // doc.Add( new Lucene.Net.Documents.TextField("favoritePhrase", thisValue, Lucene.Net.Documents.Field.Store.YES) );
 
 
@@ -100,9 +97,9 @@ namespace TestLucene.FileSearch
 
         public static string GetHomeDirectory()
         {
-            if(System.Environment.OSVersion.Platform == PlatformID.Unix)
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
                 return System.Environment.ExpandEnvironmentVariables("$HOME");
-            
+
             return System.Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
         }
 
@@ -120,13 +117,13 @@ namespace TestLucene.FileSearch
 
             all_files = System.Linq.Enumerable.Concat(all_files, files);
 
-            
+
             // foreach (string s in files) System.Console.WriteLine(s);
-            
+
             BuildIndex(indexPath, files);
         } // End Sub BuildIndex 
-        
-        
+
+
         // https://lucenenet.apache.org/
         // https://www.codeproject.com/Articles/609980/Small-Lucene-NET-Demo-App
         // https://stackoverflow.com/questions/12600196/lucene-how-to-index-file-names
@@ -134,14 +131,14 @@ namespace TestLucene.FileSearch
         {
             Lucene.Net.Util.LuceneVersion version = Lucene.Net.Util.LuceneVersion.LUCENE_48;
             Lucene.Net.Store.Directory luceneIndexDirectory = Lucene.Net.Store.FSDirectory.Open(indexPath);
-            
+
             Lucene.Net.Index.IndexReader r = Lucene.Net.Index.DirectoryReader.Open(luceneIndexDirectory);
-            
+
             Lucene.Net.Search.IndexSearcher searcher = new Lucene.Net.Search.IndexSearcher(r);
             Lucene.Net.Analysis.Analyzer analyzer = GetWrappedAnalyzer();
-            
+
             Lucene.Net.QueryParsers.Classic.QueryParser parser = new Lucene.Net.QueryParsers.Classic.QueryParser(version, "file_name", analyzer);
-            
+
             // https://stackoverflow.com/questions/15170097/how-to-search-across-all-the-fields
             // Lucene.Net.QueryParsers.Classic.MultiFieldQueryParser parser = new Lucene.Net.QueryParsers.Classic.MultiFieldQueryParser(version, GetFields(r), analyzer);
 
@@ -173,32 +170,66 @@ namespace TestLucene.FileSearch
         {
             // IndexFiles();
             // SearchPath(@"15-03-_2018_13-49-43.png");
-            
-            System.IO.DriveInfo[] dvs = System.IO.DriveInfo.GetDrives();
-            foreach (System.IO.DriveInfo dvi in dvs)
+
+            foreach (string thisFile in EnumerateAllDrivesFiles())
             {
-                if(dvi.DriveType != DriveType.Fixed)
-                    continue;
-                
-                if(dvi.TotalSize == 0)
-                    continue;
-                
-                if (dvi.RootDirectory == null 
-                    || dvi.RootDirectory.FullName.StartsWith("/snap", StringComparison.InvariantCultureIgnoreCase)
-                    || dvi.RootDirectory.FullName.StartsWith("/boot", StringComparison.InvariantCultureIgnoreCase))
-                    continue;
-                
-                System.Console.WriteLine(dvi.DriveType);
-                System.Console.WriteLine(dvi.DriveFormat);
-                System.Console.WriteLine(dvi.AvailableFreeSpace);
-                System.Console.WriteLine(dvi.TotalSize);
-                System.Console.WriteLine(dvi.TotalFreeSpace);
-                System.Console.WriteLine(dvi.RootDirectory);
+                System.Console.WriteLine(thisFile);
             }
-            
+
             System.Console.WriteLine("That's all !");
-            
         } // End Sub Test 
+
+
+        public static System.Collections.Generic.IEnumerable<string> EnumerateDrivesRoot()
+        {
+            System.IO.DriveInfo[] disks = System.IO.DriveInfo.GetDrives();
+            foreach (System.IO.DriveInfo thisDisk in disks)
+            {
+                if (thisDisk.DriveType != System.IO.DriveType.Fixed)
+                    continue;
+
+                if (thisDisk.TotalSize == 0)
+                    continue;
+
+                if (thisDisk.RootDirectory == null
+                    || thisDisk.RootDirectory.FullName.StartsWith("/snap", System.StringComparison.InvariantCultureIgnoreCase)
+                    || thisDisk.RootDirectory.FullName.StartsWith("/boot", System.StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+
+                // System.Console.WriteLine(thisDisk.DriveType);
+                // System.Console.WriteLine(thisDisk.DriveFormat);
+                // System.Console.WriteLine(thisDisk.AvailableFreeSpace);
+                // System.Console.WriteLine(thisDisk.TotalSize);
+                // System.Console.WriteLine(thisDisk.TotalFreeSpace);
+                // System.Console.WriteLine(thisDisk.RootDirectory);
+
+                yield return thisDisk.RootDirectory.FullName;
+            } // Next thisDisk 
+
+        } // End Function GetDrivesRoot 
+
+
+        public static System.Collections.Generic.IEnumerable<string> EnumerateAllDrivesFiles(System.Collections.Generic.IEnumerable<string> rootDirectories, System.IO.SearchOption options)
+        {
+
+            foreach (string thisRootDirectory in rootDirectories)
+            {
+
+                foreach (string thisFile in System.IO.Directory.EnumerateFiles(thisRootDirectory, "*.*", options))
+                {
+                    yield return thisFile;
+                } // Next thisFile 
+
+            } // Next thisRootDirectory 
+
+        } // End Sub GetAllDrivesFiles 
+
+
+        public static System.Collections.Generic.IEnumerable<string> EnumerateAllDrivesFiles()
+        {
+            System.Collections.Generic.IEnumerable<string> rootDirectories = EnumerateDrivesRoot();
+            return EnumerateAllDrivesFiles(rootDirectories, System.IO.SearchOption.AllDirectories);
+        } // End Function GetAllDrivesFiles 
 
 
     } // End Class IndexedSearch 

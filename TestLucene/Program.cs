@@ -28,9 +28,6 @@ namespace TestLucene
         } // End Sub Main 
 
 
-
-
-
         public static void TestCompleteness()
         {
             string path = @"D:\username\Desktop\DesktopArchiv";
@@ -41,7 +38,7 @@ namespace TestLucene
 
             System.Console.WriteLine(ls.Count);
             System.Console.WriteLine(arr.Length);
-        }
+        } // End Sub TestCompleteness 
 
 
         public static async System.Threading.Tasks.Task TestJsonGeneration2()
@@ -99,7 +96,7 @@ namespace TestLucene
 
             string txt = sb.ToString();
             System.Console.WriteLine(txt);
-        }
+        } // End Sub TestJsonGeneration2 
 
 
         public static async System.Threading.Tasks.Task TestJsonGeneration()
@@ -147,7 +144,7 @@ namespace TestLucene
 
             string txt = sb.ToString();
             System.Console.WriteLine(txt);
-        }
+        } // End Sub TestJsonGeneration 
 
 
         public static async System.Threading.Tasks.Task TestJsonGeneration1()
@@ -176,7 +173,7 @@ namespace TestLucene
 
             string txt = sb.ToString();
             System.Console.WriteLine(txt);
-        }
+        } // End Sub TestJsonGeneration1 
 
 
         static void TestFSE()
@@ -207,7 +204,7 @@ namespace TestLucene
 
             } // Next fsi 
 
-        } // End Sub Main 
+        } // End Sub TestFSE 
 
 
     } // End Class Program 

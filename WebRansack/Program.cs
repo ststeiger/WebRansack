@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting; // for UseStartup
 // using Microsoft.Extensions.Configuration;
 // using Microsoft.Extensions.Logging;
 
-// https://stackoverflow.com/questions/241238/how-to-get-xpath-from-an-xmlnode-instance/18184670
+
 // https://stackoverflow.com/questions/3640293/is-there-a-way-to-generate-a-css-selector-based-on-a-dom-element-in-jquery
 
 namespace WebRansack

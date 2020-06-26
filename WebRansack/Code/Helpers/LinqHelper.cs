@@ -109,7 +109,7 @@ namespace WebRansack
                 // memberExp = System.Linq.Expressions.Expression.Property(targetExp, fieldName);
                 memberExp = System.Linq.Expressions.Expression.PropertyOrField(targetExp, fieldName);
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 return null;
             }

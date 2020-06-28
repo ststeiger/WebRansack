@@ -53,6 +53,22 @@
             };
         }
 
+        if (!String.prototype.endsWith)
+        {
+            String.prototype.endsWith = function (search, this_len)
+            {
+                if (this_len === undefined || this_len > this.length)
+                {
+                    this_len = this.length;
+                }
+                return this.substring(this_len - search.length, this_len) === search;
+            };
+        }
+
+        String.prototype.replaceAt = function (index, replacement)
+        {
+            return this.substr(0, index) + replacement + this.substr(index + replacement.length);
+        }
 
         function wsUrl(urlPart)
         {
@@ -84,6 +100,76 @@
         }
 
 
+
+        function outputData(data)
+        {
+            // console.log("preData", data);
+
+            if (data.startsWith(","))
+                data.replaceAt(0, "[")
+            
+            if (!data.startsWith("["))
+                data = "[" + data;
+
+            if (!data.endsWith("]"))
+                data = data + "]";
+
+
+            // console.log("postData", data);
+
+
+            var p = null;
+
+            try
+            {
+                p = JSON.parse(data);
+            }
+            catch (ex)
+            {
+                console.log("ex", ex);
+                console.log("dataaah!", data);
+                debugger;
+                return;
+            }
+
+
+
+            if (!Array.isArray(p))
+                return;
+
+            /*
+            for (var i = 0, len = p.length; i < len; ++i)
+            {
+                console.log(p[i]);
+                
+                for (var key in p[i])
+                {
+                    if (p[i].hasOwnProperty(key))
+                    {
+                        console.log(key + " -> " + p[i][key]);
+                    } // End if (p[i].hasOwnProperty(key)) 
+                } // Next key 
+                
+                for (const [key, value] of Object.entries(p[i]))
+                {
+                    // console.log(key, value);
+                    console.log(`${key}: ${value}`);
+                }  // Next [key, value] 
+
+            } // Next i 
+            */
+            
+            
+
+
+            
+            
+
+        }
+
+
+
+
         function example()
         {
             let exampleSocket = new WebSocket(wsUrl("table")); //, "protocolOne");
@@ -97,8 +183,18 @@
             exampleSocket.onmessage = function (event)
             {
                 console.log("onmessage", event);
-                console.log("ed", event.data);
+                // console.log("ed", event.data);
 
+                try
+                {
+                    outputData(event.data);
+                }
+                catch (ex)
+                {
+                    console.log(ex.message, event.data);
+                }
+                
+                
 
 
                 // JSON.parse(event.data);

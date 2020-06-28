@@ -98,8 +98,8 @@ namespace TestLucene.FileSearch
         public static string GetHomeDirectory()
         {
             if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
-                return System.Environment.ExpandEnvironmentVariables("$HOME");
-
+                return System.Environment.GetEnvironmentVariable("HOME");
+            
             // return System.Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"); // Z:
             // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile); // C:\Users
             // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.History); // C:/...

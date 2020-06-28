@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Hosting; // for UseStartup
 namespace WebRansack
 {
 
-    
+
     public class Program
     {
 
@@ -43,15 +43,19 @@ namespace WebRansack
 
             currentMemoryUsage /= 1048576; // 1048576 = 1024^2 = MB
             peakPhysicalMemoryUsage /= 1048576; // 1048576 = 1024^2 = MB
-            
-            System.Console.WriteLine("Current: " + currentMemoryUsage.ToString(System.Globalization.CultureInfo.InvariantCulture) + "MB");
-            System.Console.WriteLine("Peak: " + peakPhysicalMemoryUsage.ToString(System.Globalization.CultureInfo.InvariantCulture) + "MB");
-            
+
+            System.Console.WriteLine("Current: " +
+                                     currentMemoryUsage.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                                     "MB");
+            System.Console.WriteLine(
+                "Peak: " + peakPhysicalMemoryUsage.ToString(System.Globalization.CultureInfo.InvariantCulture) + "MB");
+
             await System.Threading.Tasks.Task.CompletedTask;
         }
 
 
-        public static async System.Threading.Tasks.Task PeriodicTask(System.TimeSpan interval, System.Threading.CancellationToken cancellationToken)
+        public static async System.Threading.Tasks.Task PeriodicTask(System.TimeSpan interval,
+            System.Threading.CancellationToken cancellationToken)
         {
             using (System.Diagnostics.Process proc = System.Diagnostics.Process.GetCurrentProcess())
             {
@@ -64,15 +68,16 @@ namespace WebRansack
 
             }
         }
-        
-        
-        public static async System.Threading.Tasks.Task PeriodicTask(int interval, System.Threading.CancellationToken cancellationToken)
+
+
+        public static async System.Threading.Tasks.Task PeriodicTask(int interval,
+            System.Threading.CancellationToken cancellationToken)
         {
             System.TimeSpan ts = new System.TimeSpan(0, 0, interval);
             await PeriodicTask(ts, cancellationToken);
         }
-        
-        
+
+
         public static void Main(string[] args)
         {
             _ = PeriodicTask(10, System.Threading.CancellationToken.None);
@@ -84,11 +89,11 @@ namespace WebRansack
         {
             return Microsoft.AspNetCore.WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .Build();            
+                .Build();
         }
         
         
-    }
+    } // End Class Program 
     
     
-}
+} // End Namespace WebRansack 

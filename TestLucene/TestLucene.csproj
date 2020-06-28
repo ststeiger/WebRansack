@@ -13,7 +13,6 @@
     <PackageReference Include="Lucene.Net.Queries" Version="4.8.0-beta00006" />
     <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00006" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="SkiaSharp" Version="1.68.3" />
   </ItemGroup>
 
 </Project>

@@ -19,6 +19,9 @@ namespace TestLucene
         {
             // System.Console.WriteLine(new System.Globalization.CultureInfo("ru-ru").TextInfo.ListSeparator);
 
+            // FileSearch.HtmlSelectorTest.Test();
+            // FileSearch.XmlSelectorTest.Test();
+
             FileSearch.IndexedSearch.Test();
             
             // TestJsonGeneration().Wait();

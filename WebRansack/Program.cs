@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Hosting; // for UseStartup
 // using Microsoft.Extensions.Logging;
 
 
-// https://stackoverflow.com/questions/3640293/is-there-a-way-to-generate-a-css-selector-based-on-a-dom-element-in-jquery
-
 namespace WebRansack
 {
 

@@ -59,13 +59,13 @@
     <a href="replace.htm" target="_blank">Search and replace</a><br />
     <a href="table.htm" target="_blank">Result Table</a><br />
 
+    <a href="3d_view.htm" target="_blank">3D view</a><br />
+
 
     <script type="text/javascript">
 
-        if (!String.prototype.startsWith)
-        {
-            String.prototype.startsWith = function (search, pos)
-            {
+        if (!String.prototype.startsWith) {
+            String.prototype.startsWith = function (search, pos) {
                 return this.substr(!pos || pos < 0 ? 0 : +pos, search.length) === search;
             };
         }

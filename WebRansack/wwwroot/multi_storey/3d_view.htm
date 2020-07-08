@@ -1,10 +1,16 @@
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta charset="utf-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <!--
+    Original from:
+    https://www.new-leonardo.ch/fl%C3%A4chen.html
+    https://www.new-leonardo.ch/flächen.html
+    -->
+
 
     <meta http-equiv="cache-control" content="max-age=0" />
     <meta http-equiv="cache-control" content="no-cache" />
@@ -16,13 +22,14 @@
 
     <style type="text/css">
 
-        .layout-isometric img {
+        .layout-isometric img
+        {
             height: 40vh;
             width: auto;
         }
 
 
-        .layout-isometric 
+        .layout-isometric
         {
             position: relative;
             display: -ms-flexbox;
@@ -33,7 +40,7 @@
             margin-bottom: 1.25rem;
         }
 
-        .layout-isometric .layout:not(.default) 
+        .layout-isometric .layout:not(.default)
         {
             position: absolute;
             top: 0;
@@ -41,50 +48,140 @@
             display: none;
         }
 
-        th {
+
+
+        tr th
+        {
             background-color: #AF9673;
-            color: white;
+            color: #FFF;
+            font-family: Montserrat, Helvetica, Roboto, Arial, sans-serif;
             font-weight: bold;
+            font-size: 0.875rem;
+            line-height: 44px;
+            text-align: right;
+            padding: 0.375rem 0 0.375rem 0.3125rem;
         }
 
-
-        border-bottom: 2px solid #AF9673;
-
-
-        border-bottom: 2px solid #AF9673;
-
-        tr.isoRow:hover {
+        tr.isoRow:hover
+        {
             background-color: #f3efea;
         }
 
-
-
-        tr.isoRow td {
-            color: rgb(62, 61, 60);
+        tr.isoRow td
+        {
+            color: #3E3D3C;
+            #rgb(62,61,60);
             font-family: Montserrat, Helvetica, Roboto, Arial, sans-serif;
             font-weight: 400;
             font-size: 22px;
             line-height: 22px;
             border-bottom: 2px solid #AF9673;
             text-align: right;
+            padding: 0.75rem 0 0.75rem 0.625rem;
         }
-
-
-
-        tr th {
-            color: #FFF;
-            font-family: Montserrat, Helvetica, Roboto, Arial, sans-serif;
-            font-weight: 700;
-            font-size: 14px;
-            line-height: 32px;
-            text-align: right;
-            padding: 0.375rem 0 0.375rem 0.3125rem;
-        }
-
-
-
 
     </style>
+
+    <script type="text/javascript">
+
+
+        function int32ToBytes(num)
+        {
+            var arr = new ArrayBuffer(4); // int32 takes 4 bytes
+            var view = new DataView(arr);
+            view.setUint32(0, num, false); // byteOffset = 0; litteEndian = false
+            return arr;
+        }
+
+
+        function getRandomValue()
+        {
+            https://developer.mozilla.org/en-US/docs/Web/API/Window/crypto
+            var cryptoObj = window.crypto || window.msCrypto;
+            var array = new Int8Array(12);
+            window.crypto.getRandomValues(array);
+            var dataView = new DataView(array.buffer);
+
+            var int1 = dataView.getInt32(0);
+            var int2 = dataView.getInt32(4)
+            var int3 = dataView.getInt32(8)
+
+            // dataView.getUint16(6, true),
+            // dataView.getUint32(18, true),
+
+            return [int1, int2, int3];
+        }
+
+        // https://stackoverflow.com/questions/18230217/javascript-generate-a-random-number-within-a-range-using-crypto-getrandomvalues/62792582#62792582
+        function cryptoRand()
+        {
+            const array = new Uint32Array(1);
+            (window.crypto || window.msCrypto).getRandomValues(array);
+            return (randomBuffer[0] / (0xffffffff + 1));
+        }
+
+
+        function getRandomIntInclusive(min, max)
+        {
+            var randomBuffer = new Uint32Array(1);
+            (window.crypto || window.msCrypto).getRandomValues(randomBuffer);
+
+            var randomNumber = randomBuffer[0] / (0xffffffff + 1);
+
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(randomNumber * (max - min + 1)) + min;
+        }
+
+        function download(text, filename)
+        {
+            // var text = JSON.stringify(data); // "octet/stream" application/json
+
+            if (text !== null && navigator.msSaveBlob)
+                return navigator.msSaveBlob(new Blob([text], { type: "image/svg+xml" }), filename);
+
+            // var blob = new Blob([text], { type: "text/plain" });
+            var blob = new Blob([text], { type: "image/svg+xml" });
+
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            // window.URL.revokeObjectURL(url);
+        }
+
+
+        function sleep(ms)
+        {
+            return new Promise(function (resolve) { setTimeout(resolve, ms); });
+        }
+
+
+        async function DownloadAllSvgFiles()
+        {
+            var allFiles = Array.prototype.slice.call(document.querySelectorAll('img[src^="files/Grundrisse"]'))
+                .map(function (v) { return v.getAttribute("src"); })
+                .filter(function (v, i, a) { return a.indexOf(v) === i; })
+                ;
+
+            for (let i = 0; i < allFiles.length; ++i)
+            {
+                console.log("src:", allFiles[i]);
+                var filename = allFiles[i].substring(allFiles[i].lastIndexOf('/') + 1);
+                console.log("filename: ", filename);
+
+                var fetchResult = await fetch(allFiles[i]);
+                var xml = await fetchResult.text();
+                // console.log(xml);
+                download(xml, filename);
+                await sleep(5000);
+            }
+
+        }
+
+    </script>
+
 
 </head>
 <body>
@@ -95,48 +192,47 @@
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_neutral.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-2" style="display: none;">
+        <div class="layout layout-2">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_EG_C7.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-3" style="display: none;">
+        <div class="layout layout-3">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_EG_D11.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-4" style="display: none;">
+        <div class="layout layout-4">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_EG_D12.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-5" style="display: none;">
+        <div class="layout layout-5">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_EG_D13.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-6" style="display: none;">
+        <div class="layout layout-6">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_EG_D14.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-7" style="display: none;">
+        <div class="layout layout-7">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_OG-1_C15.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-8" style="display: none;
-">
+        <div class="layout layout-8">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_OG-1_D18.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-9" style="display: none;">
+        <div class="layout layout-9">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_OG-1_D19.svg" alt="" itemprop="image">
             </figure>
         </div>
-        <div class="layout layout-10" style="display: none;">
+        <div class="layout layout-10">
             <figure class="image_container">
                 <img src="Grundrisse_Isometrie/JLL_Isometrie_OG-2_A22.svg" alt="" itemprop="image">
             </figure>
@@ -390,86 +486,86 @@
 
     <div style="display: block; width: 100%; height: 10cm; overflow: scroll; direction: rtl;">
         <div style="direction: ltr;">
-        <table style="border-collapse: collapse;">
-            <thead>
-                <tr>
-                    <th>Etage/&shy;Einheit</th>
-                    <th>B&uuml;ro&shy;fl&auml;che, in m<sup>2</sup></th>
-                    <th>Miete/m<sup>2</sup>/&shy;Jahr ab</th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="isoRow" data-iso-id="1"><td>EG / C7</td><td>1566</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="2"><td>EG / D11</td><td>204</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="3"><td>EG / D12</td><td>93</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="4"><td>EG / D13</td><td>98</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="5"><td>EG / D14</td><td>276</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="6"><td>1.OG / C15</td><td>1570</td><td>320.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="7"><td>1.OG / D18</td><td>284</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="8"><td>1.OG / D19</td><td>351</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="9"><td>2.OG / A22</td><td>1014</td><td>310.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="10"><td>2.OG / B21</td><td>471</td><td>320.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="11"><td>2.OG / C20</td><td>1588</td><td>320.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="12"><td>2.OG / D23</td><td>292</td><td>295.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="13"><td>2.OG / D24</td><td>366</td><td>295.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="14"><td>3.OG / A27</td><td>1013</td><td>310.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="15"><td>3.OG / B26</td><td>471</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="16"><td>3.OG / C25</td><td>1589</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="17"><td>3.OG / D28</td><td>205</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="18"><td>3.OG / D29</td><td>410</td><td>295.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="19"><td>4.OG / A32</td><td>992</td><td>310.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="20"><td>4.OG / B31</td><td>464</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="21"><td>4.OG / C30</td><td>699</td><td>320.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="22"><td>4.OG / C40</td><td>872</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="23"><td>4.OG / D33</td><td>292</td><td>310.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="24"><td>4.OG / D34</td><td>352</td><td>305.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="25"><td>DG / A/B36</td><td>1136</td><td>340.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="26"><td>DG / C35</td><td>1487</td><td>350.-</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="27"><td>1.UG / D1</td><td>384</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="28"><td>1.UG / D2</td><td>351</td><td>Vermietet</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="29"><td>1.UG / Lager C37</td><td>106</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="30"><td>1.UG / Lager C39</td><td>108</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="31"><td>1.UG / Lager C51</td><td>232</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="32"><td>1.UG / Lager C59</td><td>108</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="33"><td>1.UG / Lager D39</td><td>36</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="34"><td>2.UG / Lager A10</td><td>46</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="35"><td>2.UG / Lager A11</td><td>43</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="36"><td>2.UG / Lager A13</td><td>40</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="37"><td>2.UG / Lager A31</td><td>40</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="38"><td>2.UG / Lager A33</td><td>45</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="39"><td>2.UG / Lager A35</td><td>45</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="40"><td>2.UG / Lager A37</td><td>36</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="41"><td>2.UG / Lager A51</td><td>39</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="42"><td>2.UG / Lager A53</td><td>45</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="43"><td>2.UG / Lager A55</td><td>45</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="44"><td>2.UG / Lager A57</td><td>39</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="45"><td>2.UG / Lager A71</td><td>36</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="46"><td>2.UG / Lager A73</td><td>44</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="47"><td>2.UG / Lager A32</td><td>17</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="48"><td>2.UG / Lager A34</td><td>20</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="49"><td>2.UG / Lager A36</td><td>112</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="50"><td>2.UG / Lager A52</td><td>126</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="51"><td>2.UG / Lager A58</td><td>50</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="52"><td>2.UG / Lager A60</td><td>10</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="53"><td>2.UG / Lager A70</td><td>16</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="54"><td>2.UG / Lager C10</td><td>209</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="55"><td>2.UG / Lager C36</td><td>35</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="56"><td>2.UG / Lager C36</td><td>60</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="57"><td>2.UG / Lager D27</td><td>20</td><td>auf Anfrage</td><td></td><td></td></tr>
-                <tr class="isoRow" data-iso-id="58"><td>2.UG / Lager D29</td><td>21</td><td>auf Anfrage</td><td></td><td></td></tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </tfoot>
-        </table>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>Etage/&shy;Einheit</th>
+                        <th>B&uuml;ro&shy;fl&auml;che, in m<sup>2</sup></th>
+                        <th>Miete/m<sup>2</sup>/&shy;Jahr ab</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="isoRow" data-iso-id="1"><td>EG / C7</td><td>1566</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="2"><td>EG / D11</td><td>204</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="3"><td>EG / D12</td><td>93</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="4"><td>EG / D13</td><td>98</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="5"><td>EG / D14</td><td>276</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="6"><td>1.OG / C15</td><td>1570</td><td>320.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="7"><td>1.OG / D18</td><td>284</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="8"><td>1.OG / D19</td><td>351</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="9"><td>2.OG / A22</td><td>1014</td><td>310.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="10"><td>2.OG / B21</td><td>471</td><td>320.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="11"><td>2.OG / C20</td><td>1588</td><td>320.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="12"><td>2.OG / D23</td><td>292</td><td>295.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="13"><td>2.OG / D24</td><td>366</td><td>295.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="14"><td>3.OG / A27</td><td>1013</td><td>310.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="15"><td>3.OG / B26</td><td>471</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="16"><td>3.OG / C25</td><td>1589</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="17"><td>3.OG / D28</td><td>205</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="18"><td>3.OG / D29</td><td>410</td><td>295.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="19"><td>4.OG / A32</td><td>992</td><td>310.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="20"><td>4.OG / B31</td><td>464</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="21"><td>4.OG / C30</td><td>699</td><td>320.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="22"><td>4.OG / C40</td><td>872</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="23"><td>4.OG / D33</td><td>292</td><td>310.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="24"><td>4.OG / D34</td><td>352</td><td>305.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="25"><td>DG / A/B36</td><td>1136</td><td>340.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="26"><td>DG / C35</td><td>1487</td><td>350.-</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="27"><td>1.UG / D1</td><td>384</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="28"><td>1.UG / D2</td><td>351</td><td>Vermietet</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="29"><td>1.UG / Lager C37</td><td>106</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="30"><td>1.UG / Lager C39</td><td>108</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="31"><td>1.UG / Lager C51</td><td>232</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="32"><td>1.UG / Lager C59</td><td>108</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="33"><td>1.UG / Lager D39</td><td>36</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="34"><td>2.UG / Lager A10</td><td>46</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="35"><td>2.UG / Lager A11</td><td>43</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="36"><td>2.UG / Lager A13</td><td>40</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="37"><td>2.UG / Lager A31</td><td>40</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="38"><td>2.UG / Lager A33</td><td>45</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="39"><td>2.UG / Lager A35</td><td>45</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="40"><td>2.UG / Lager A37</td><td>36</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="41"><td>2.UG / Lager A51</td><td>39</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="42"><td>2.UG / Lager A53</td><td>45</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="43"><td>2.UG / Lager A55</td><td>45</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="44"><td>2.UG / Lager A57</td><td>39</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="45"><td>2.UG / Lager A71</td><td>36</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="46"><td>2.UG / Lager A73</td><td>44</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="47"><td>2.UG / Lager A32</td><td>17</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="48"><td>2.UG / Lager A34</td><td>20</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="49"><td>2.UG / Lager A36</td><td>112</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="50"><td>2.UG / Lager A52</td><td>126</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="51"><td>2.UG / Lager A58</td><td>50</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="52"><td>2.UG / Lager A60</td><td>10</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="53"><td>2.UG / Lager A70</td><td>16</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="54"><td>2.UG / Lager C10</td><td>209</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="55"><td>2.UG / Lager C36</td><td>35</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="56"><td>2.UG / Lager C36</td><td>60</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="57"><td>2.UG / Lager D27</td><td>20</td><td>auf Anfrage</td><td></td><td></td></tr>
+                    <tr class="isoRow" data-iso-id="58"><td>2.UG / Lager D29</td><td>21</td><td>auf Anfrage</td><td></td><td></td></tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
 
@@ -479,35 +575,43 @@
 
         var isoRows = document.querySelectorAll('tr.isoRow');
         var isoLayout = document.querySelector('.layout-isometric');
-        console.log("isoRows: ", isoRows);
-        console.log("isoLayout: ", isoLayout);
+        // console.log("isoRows: ", isoRows);
+        // console.log("isoLayout: ", isoLayout);
 
 
-        function onHover(el, handlerIn, handlerOut) {
+        function onHover(el, handlerIn, handlerOut)
+        {
             el.addEventListener('mouseover', handlerIn);
             el.addEventListener('mouseout', handlerOut);
         }
 
 
-        function onHoverIn(e) {
+        function onHoverIn(e)
+        {
             console.log("hoverIn", e.currentTarget);
 
             isoLayout.classList.toggle("hover");
 
-
-            var tr = document.querySelector(".layout-" + e.currentTarget.getAttribute('data-iso-id'));
+            var fu = e.currentTarget.getAttribute('data-iso-id') - (-1);
+            var tr = document.querySelector(".layout-" + fu.toString());
+            console.log("tr-in:", tr);
             tr.style.display = "block";
         }
 
-        function onHoverOut(e) {
+        function onHoverOut(e)
+        {
             console.log("onHoverOut", e.currentTarget);
             isoLayout.classList.toggle("hover");
-            var tr = document.querySelector(".layout-" + e.currentTarget.getAttribute('data-iso-id'));
+
+            var fu = e.currentTarget.getAttribute('data-iso-id') - (-1);
+
+            var tr = document.querySelector(".layout-" + fu.toString());
+            console.log("tr-out:", tr);
             tr.style.display = "none";
         }
 
 
-        if (isoRows.length && isoLayout)
+        if (isoRows && isoRows.length && isoLayout)
         {
             for (let i = 0; i < isoRows.length; ++i)
             {

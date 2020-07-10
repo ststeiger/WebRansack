@@ -1,4 +1,7 @@
 ﻿
+using System;
+using DocumentFormat.OpenXml.Drawing.Charts;
+
 namespace TestLucene.FileSearch
 {
 
@@ -116,17 +119,14 @@ namespace TestLucene.FileSearch
         public static void BuildIndex()
         {
             string path = @"D:\username\Desktop\DesktopArchiv";
-            string indexPath = @"D:\lol\lucene";
-
-            indexPath = System.IO.Path.Combine(GetHomeDirectory(), ".Lucene", "TestIndex");
-
+            string indexPath = System.IO.Path.Combine(GetHomeDirectory(), ".Lucene", "TestIndex");
+            
             System.Collections.Generic.IEnumerable<string> all_files = System.Linq.Enumerable.Empty<string>();
             System.Collections.Generic.IEnumerable<string> files =
                 System.IO.Directory.EnumerateFiles(path, "*.*", System.IO.SearchOption.AllDirectories);
-
+            
             all_files = System.Linq.Enumerable.Concat(all_files, files);
-
-
+            
             // foreach (string s in files) System.Console.WriteLine(s);
 
             BuildIndex(indexPath, files);
@@ -179,11 +179,10 @@ namespace TestLucene.FileSearch
         {
             string ghc = GetHomeDirectory();
             System.Console.WriteLine(ghc);
-
-
+            
             // IndexFiles();
             // SearchPath(@"15-03-_2018_13-49-43.png");
-
+            
             foreach (string thisFile in EnumerateAllDrivesFiles())
             {
                 System.Console.WriteLine(thisFile);
@@ -222,19 +221,80 @@ namespace TestLucene.FileSearch
         } // End Function GetDrivesRoot 
 
 
-        public static System.Collections.Generic.IEnumerable<string> EnumerateAllDrivesFiles(System.Collections.Generic.IEnumerable<string> rootDirectories, System.IO.SearchOption options)
-        {
 
+        public static void foo()
+        {
+            // https://stackoverflow.com/questions/3932382/traversing-directories-without-using-recursion
+            // http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/00cd9dc3c2b5/src/share/classes/java/util/ArrayDeque.java
+            Wintellect.PowerCollections.Deque<System.IO.FileInfo> stack = new Wintellect.PowerCollections.Deque<System.IO.FileInfo>();
+            stack.Add(new System.IO.FileInfo("<path>"));
+
+            int n = 0;
+            
+            stack.
+
+            while(!stack.isEmpty()){
+
+                n++;
+                System.IO.FileInfo file = stack.pop();
+
+                System.Console.Error.WriteLine(file);
+
+                System.IO.DirectoryInfo di;
+                di.GetFileSystemInfos();
+                
+                System.IO.FileSystemInfo fi;
+                
+
+                System.IO.FileInfo[] files = file.listFiles();
+
+                for(System.IO.FileInfo f: files){
+
+                    if(f.isHidden()) continue;
+
+                    if(f.isDirectory()){
+                        stack.push(f);
+                        continue;
+                    }
+
+                    n++;
+                    System.Console.WriteLine((f);
+
+
+                }
+
+            }
+
+            System.Console.WriteLine(n);
+        }
+
+
+
+        public static System.Collections.Generic.IEnumerable<string> EnumerateAllDrivesFiles(
+            System.Collections.Generic.IEnumerable<string> rootDirectories, System.IO.SearchOption options)
+        {
             foreach (string thisRootDirectory in rootDirectories)
             {
+                System.Collections.Generic.IEnumerable<string> nu = null;
 
-                foreach (string thisFile in System.IO.Directory.EnumerateFiles(thisRootDirectory, "*.*", options))
+                try
+                {
+                    nu = System.IO.Directory.EnumerateFiles(thisRootDirectory, "*.*", options);
+                }
+                catch (System.Exception foo)
+                {
+                    System.Console.WriteLine(foo.Message);
+                    System.Console.WriteLine(foo.StackTrace);
+                    System.Console.WriteLine(thisRootDirectory);
+                }
+                
+                foreach (string thisFile in nu)
                 {
                     yield return thisFile;
                 } // Next thisFile 
-
+                
             } // Next thisRootDirectory 
-
+            
         } // End Sub GetAllDrivesFiles 
 
 

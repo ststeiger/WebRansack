@@ -1,6 +1,7 @@
 ﻿
 using System;
-using DocumentFormat.OpenXml.Drawing.Charts;
+using System.IO;
+using System.Security.Principal;
 
 namespace TestLucene.FileSearch
 {
@@ -102,7 +103,7 @@ namespace TestLucene.FileSearch
         {
             if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
                 return System.Environment.GetEnvironmentVariable("HOME");
-            
+
             // return System.Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"); // Z:
             // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile); // C:\Users
             // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.History); // C:/...
@@ -120,13 +121,13 @@ namespace TestLucene.FileSearch
         {
             string path = @"D:\username\Desktop\DesktopArchiv";
             string indexPath = System.IO.Path.Combine(GetHomeDirectory(), ".Lucene", "TestIndex");
-            
+
             System.Collections.Generic.IEnumerable<string> all_files = System.Linq.Enumerable.Empty<string>();
             System.Collections.Generic.IEnumerable<string> files =
                 System.IO.Directory.EnumerateFiles(path, "*.*", System.IO.SearchOption.AllDirectories);
-            
+
             all_files = System.Linq.Enumerable.Concat(all_files, files);
-            
+
             // foreach (string s in files) System.Console.WriteLine(s);
 
             BuildIndex(indexPath, files);
@@ -179,13 +180,13 @@ namespace TestLucene.FileSearch
         {
             string ghc = GetHomeDirectory();
             System.Console.WriteLine(ghc);
-            
+
             // IndexFiles();
             // SearchPath(@"15-03-_2018_13-49-43.png");
-            
-            foreach (string thisFile in EnumerateAllDrivesFiles())
+
+            foreach (System.IO.FileInfo thisFile in EnumerateAllDrivesFiles())
             {
-                System.Console.WriteLine(thisFile);
+                System.Console.WriteLine(thisFile.FullName);
             }
 
             System.Console.WriteLine("That's all !");
@@ -222,83 +223,209 @@ namespace TestLucene.FileSearch
 
 
 
-        public static void foo()
+        private static bool IsSymLink(System.IO.FileSystemInfo pathInfo)
         {
-            // https://stackoverflow.com/questions/3932382/traversing-directories-without-using-recursion
-            // http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/00cd9dc3c2b5/src/share/classes/java/util/ArrayDeque.java
-            Wintellect.PowerCollections.Deque<System.IO.FileInfo> stack = new Wintellect.PowerCollections.Deque<System.IO.FileInfo>();
-            stack.Add(new System.IO.FileInfo("<path>"));
-
-            int n = 0;
-            
-            stack.
-
-            while(!stack.isEmpty()){
-
-                n++;
-                System.IO.FileInfo file = stack.pop();
-
-                System.Console.Error.WriteLine(file);
-
-                System.IO.DirectoryInfo di;
-                di.GetFileSystemInfos();
-                
-                System.IO.FileSystemInfo fi;
-                
-
-                System.IO.FileInfo[] files = file.listFiles();
-
-                for(System.IO.FileInfo f: files){
-
-                    if(f.isHidden()) continue;
-
-                    if(f.isDirectory()){
-                        stack.push(f);
-                        continue;
-                    }
-
-                    n++;
-                    System.Console.WriteLine((f);
+            return pathInfo.Attributes.HasFlag(System.IO.FileAttributes.ReparsePoint);
+        }
 
 
-                }
+        // https://stackoverflow.com/questions/45132081/file-permissions-on-linux-unix-with-net-core
+        public static bool LinDirectoryHasPermission(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
+        {
+            Mono.Unix.UnixFileInfo unixFileInfo = new Mono.Unix.UnixFileInfo("test.txt");
+            // set file permission to 644
+            unixFileInfo.FileAccessPermissions =
+                Mono.Unix.FileAccessPermissions.UserRead | Mono.Unix.FileAccessPermissions.UserWrite
+                | Mono.Unix.FileAccessPermissions.GroupRead
+                | Mono.Unix.FileAccessPermissions.OtherRead;
 
-            }
 
-            System.Console.WriteLine(n);
+            // https://www.geeksforgeeks.org/access-control-listsacl-linux/
+            // https://www.tecmint.com/secure-files-using-acls-in-linux/
+
+            Mono.Unix.UnixDirectoryInfo unixDirectoryInfo = new Mono.Unix.UnixDirectoryInfo("/");
+            unixDirectoryInfo.FileAccessPermissions =
+            Mono.Unix.FileAccessPermissions.UserRead | Mono.Unix.FileAccessPermissions.UserWrite
+            | Mono.Unix.FileAccessPermissions.GroupRead
+            | Mono.Unix.FileAccessPermissions.OtherRead;
+
+
+            return false;
         }
 
 
 
-        public static System.Collections.Generic.IEnumerable<string> EnumerateAllDrivesFiles(
+        /// <summary>
+        /// Test a directory for create file access permissions
+        /// </summary>
+        /// <param name="DirectoryPath">Full path to directory </param>
+        /// <param name="AccessRight">File System right tested</param>
+        /// <returns>State [bool]</returns>
+        public static bool DirectoryHasPermission(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
+        {
+            if (!di.Exists)
+                return false;
+
+            // Requires nuget: System.IO.FileSystem.AccessControl 
+            try
+            {
+                System.Security.AccessControl.AuthorizationRuleCollection rules = System.IO.FileSystemAclExtensions.GetAccessControl(di).GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
+                WindowsIdentity identity = WindowsIdentity.GetCurrent();
+
+                // https://stackoverflow.com/questions/1410127/c-sharp-test-if-user-has-write-access-to-a-folder
+                // AccessControlType deny takes precedence over allow, so to be completely thorough rules that deny the access right should be checked as well, 
+                foreach (System.Security.AccessControl.FileSystemAccessRule rule in rules)
+                {
+                    // if (identity.Groups.Contains(rule.IdentityReference))
+                    if (identity.Groups.Contains(rule.IdentityReference) || identity.Owner.Equals(rule.IdentityReference))
+                    {
+                        if ((AccessRight & rule.FileSystemRights) > 0)
+                        {
+                            if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Deny)
+                                return false;
+                        }
+                    }
+                }
+
+
+                foreach (System.Security.AccessControl.FileSystemAccessRule rule in rules)
+                {
+                    // if (identity.Groups.Contains(rule.IdentityReference))
+                    if (identity.Groups.Contains(rule.IdentityReference) || identity.Owner.Equals(rule.IdentityReference))
+                    {
+                        if ((AccessRight & rule.FileSystemRights) == AccessRight)
+                        {
+                            if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Allow)
+                                return true;
+                        }
+                    }
+                }
+            }
+            catch { }
+            return false;
+        }
+
+
+        public static System.Collections.Generic.IEnumerable<System.IO.FileInfo> IterativelyEnumerate(
+              System.IO.DirectoryInfo initialPath,
+              System.Func<System.IO.FileInfo, bool> selector
+            )
+        {
+            // https://stackoverflow.com/questions/3932382/traversing-directories-without-using-recursion
+            // http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/00cd9dc3c2b5/src/share/classes/java/util/ArrayDeque.java
+            System.Collections.Generic.Stack<System.IO.DirectoryInfo> stack = new System.Collections.Generic.Stack<System.IO.DirectoryInfo>();
+            stack.Push(initialPath);
+
+            int n = 0;
+
+            string NtAccountName = System.Environment.UserDomainName + @"\" + System.Environment.UserName;
+
+            while (stack.Count != 0)
+            {
+                n++;
+                System.IO.DirectoryInfo di = stack.Pop();
+
+                System.IO.FileSystemInfo[] entries = null;
+                try
+                {
+                    bool hasPerm = DirectoryHasPermission(di, System.Security.AccessControl.FileSystemRights.Read);
+
+                    if (!hasPerm)
+                    {
+                        System.Console.WriteLine(di.FullName);
+                        continue;
+                    }
+
+                    entries = di.GetFileSystemInfos();
+                }
+                catch (System.Exception ex)
+                {
+                    // "Access to the path 'C:\\Windows\\Temp' is denied."
+                    // still one bug: 'C:\ProgramData\Microsoft\NetFramework\BreadcrumbStore'
+                    System.Console.WriteLine(ex.Message);
+                    System.Console.WriteLine(ex.StackTrace);
+                    continue;
+                }
+
+
+
+                foreach (System.IO.FileSystemInfo f in entries)
+                {
+                    if (f.IsDirectory())
+                    {
+                        stack.Push((System.IO.DirectoryInfo)f);
+                        continue;
+                    }
+
+                    if (IsSymLink(f))
+                        continue;
+
+                    // if (f.IsHidden()) continue;
+
+                    n++;
+                    System.IO.FileInfo fi = (System.IO.FileInfo)f;
+
+
+                    if (selector != null && !selector(fi))
+                        continue;
+
+                    System.Console.WriteLine(fi.FullName);
+                    yield return fi;
+                } // Next f 
+
+            } // Whend 
+
+            System.Console.WriteLine(n);
+        } // End Function IterativelyEnumerate 
+
+
+        public static System.Collections.Generic.IEnumerable<System.IO.FileInfo> IterativelyEnumerate(string path, System.Func<System.IO.FileInfo, bool> selector)
+        {
+            return IterativelyEnumerate(new System.IO.DirectoryInfo(path), selector);
+        }
+
+        public static System.Collections.Generic.IEnumerable<System.IO.FileInfo> IterativelyEnumerate(System.IO.DirectoryInfo path)
+        {
+            return IterativelyEnumerate(path, null);
+        }
+
+        public static System.Collections.Generic.IEnumerable<System.IO.FileInfo> IterativelyEnumerate(string path)
+        {
+            return IterativelyEnumerate(new System.IO.DirectoryInfo(path));
+        }
+
+
+
+        public static System.Collections.Generic.IEnumerable<System.IO.FileInfo> EnumerateAllDrivesFiles(
             System.Collections.Generic.IEnumerable<string> rootDirectories, System.IO.SearchOption options)
         {
             foreach (string thisRootDirectory in rootDirectories)
             {
-                System.Collections.Generic.IEnumerable<string> nu = null;
+                //foreach (string thisFile in System.IO.Directory.EnumerateFiles(thisRootDirectory, "*.*", options))
+                //{
+                //    yield return thisFile;
+                //} // Next thisFile 
 
-                try
-                {
-                    nu = System.IO.Directory.EnumerateFiles(thisRootDirectory, "*.*", options);
-                }
-                catch (System.Exception foo)
-                {
-                    System.Console.WriteLine(foo.Message);
-                    System.Console.WriteLine(foo.StackTrace);
-                    System.Console.WriteLine(thisRootDirectory);
-                }
-                
-                foreach (string thisFile in nu)
+                foreach (System.IO.FileInfo thisFile in IterativelyEnumerate(thisRootDirectory,
+                    delegate (System.IO.FileInfo fi)
+                    {
+                        if (".ini".Equals(fi.Extension, StringComparison.InvariantCultureIgnoreCase))
+                            return true;
+
+                        return false;
+                    })
+                    )
                 {
                     yield return thisFile;
                 } // Next thisFile 
-                
+
             } // Next thisRootDirectory 
-            
+
+            System.Console.WriteLine("Finished");
         } // End Sub GetAllDrivesFiles 
 
 
-        public static System.Collections.Generic.IEnumerable<string> EnumerateAllDrivesFiles()
+        public static System.Collections.Generic.IEnumerable<System.IO.FileInfo> EnumerateAllDrivesFiles()
         {
             System.Collections.Generic.IEnumerable<string> rootDirectories = EnumerateDrivesRoot();
             return EnumerateAllDrivesFiles(rootDirectories, System.IO.SearchOption.AllDirectories);

@@ -1,7 +1,10 @@
 ﻿
 using System;
 using System.IO;
+using System.Security.AccessControl;
 using System.Security.Principal;
+using Mono.Unix;
+using Mono.Unix.Native;
 
 namespace TestLucene.FileSearch
 {
@@ -220,52 +223,114 @@ namespace TestLucene.FileSearch
             } // Next thisDisk 
 
         } // End Function GetDrivesRoot 
-
-
-
+        
+        
         private static bool IsSymLink(System.IO.FileSystemInfo pathInfo)
         {
             return pathInfo.Attributes.HasFlag(System.IO.FileAttributes.ReparsePoint);
-        }
-
-
+        } // End Function IsSymLink 
+        
+        
         // https://stackoverflow.com/questions/45132081/file-permissions-on-linux-unix-with-net-core
-        public static bool LinDirectoryHasPermission(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
+        private static bool DirectoryHasPermission_Unix(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
         {
+            int res = Mono.Unix.Native.Syscall.access(di.FullName, AccessModes.F_OK | AccessModes.R_OK);
+            return res == 0;
+            
+            /*
             Mono.Unix.UnixFileInfo unixFileInfo = new Mono.Unix.UnixFileInfo("test.txt");
             // set file permission to 644
             unixFileInfo.FileAccessPermissions =
                 Mono.Unix.FileAccessPermissions.UserRead | Mono.Unix.FileAccessPermissions.UserWrite
                 | Mono.Unix.FileAccessPermissions.GroupRead
                 | Mono.Unix.FileAccessPermissions.OtherRead;
-
-
+            */
+            
             // https://www.geeksforgeeks.org/access-control-listsacl-linux/
             // https://www.tecmint.com/secure-files-using-acls-in-linux/
-
-            Mono.Unix.UnixDirectoryInfo unixDirectoryInfo = new Mono.Unix.UnixDirectoryInfo("/");
-            unixDirectoryInfo.FileAccessPermissions =
-            Mono.Unix.FileAccessPermissions.UserRead | Mono.Unix.FileAccessPermissions.UserWrite
-            | Mono.Unix.FileAccessPermissions.GroupRead
-            | Mono.Unix.FileAccessPermissions.OtherRead;
-
-
-            return false;
-        }
-
-
-
+            
+            // grep -i acl /boot/config*
+            // nm -D /lib/x86_64-linux-gnu/libacl.so.1 | grep "acl"
+            
+            // [on RedHat based systems]
+            // yum install nfs4-acl-tools acl libacl
+            // [on Debian based systems]
+            // sudo apt-get install nfs4-acl-tools acl
+            
+            // cat /proc/mounts
+            // df -h | grep " /$"
+            // mount | grep -i root
+            // ==>
+            // mount | grep `df -h | grep " /$" | awk '{print $1}'`
+            // tune2fs -l /dev/nvme0n1p2 | grep acl
+            // Mono.Unix.Native.Passwd ent = Mono.Unix.Native.Syscall.getpwent();
+            // Mono.Unix.Native.Syscall.getgrouplist()
+            
+            /*
+            if (AccessRight == FileSystemRights.Read)
+            {
+                Mono.Unix.UnixDirectoryInfo unixDirectoryInfo = new Mono.Unix.UnixDirectoryInfo(di.FullName);
+                return (unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.UserRead)
+                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.GroupRead)
+                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.OtherRead)
+                    );
+            }
+            else if (AccessRight == FileSystemRights.Write)
+            {
+                Mono.Unix.UnixDirectoryInfo unixDirectoryInfo = new Mono.Unix.UnixDirectoryInfo(di.FullName);
+                return (unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.UserWrite)
+                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.GroupWrite)
+                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.OtherWrite)
+                    );
+            }
+            else if (AccessRight == FileSystemRights.ExecuteFile)
+            {
+                Mono.Unix.UnixDirectoryInfo unixDirectoryInfo = new Mono.Unix.UnixDirectoryInfo(di.FullName);
+                return (unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.UserExecute)
+                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.GroupExecute)
+                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.OtherExecute)
+                    );
+            }
+            */
+            
+            throw new System.NotImplementedException("AccessRight for \"" + AccessRight.ToString() + "\"");
+        } // End Function DirectoryHasPermission_Unix 
+        
+        
         /// <summary>
         /// Test a directory for create file access permissions
         /// </summary>
         /// <param name="DirectoryPath">Full path to directory </param>
         /// <param name="AccessRight">File System right tested</param>
         /// <returns>State [bool]</returns>
-        public static bool DirectoryHasPermission(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
+        public static bool DirectoryHasPermission(System.IO.DirectoryInfo di,
+            System.Security.AccessControl.FileSystemRights AccessRight)
         {
             if (!di.Exists)
                 return false;
-
+            
+            bool ret = false;
+            
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+                ret = DirectoryHasPermission_Unix(di, AccessRight);
+            else
+                ret = DirectoryHasPermission_Windows(di, AccessRight);
+            
+            return ret;
+        } // End Function DirectoryHasPermission 
+        
+        
+        /// <summary>
+        /// Test a directory for create file access permissions
+        /// </summary>
+        /// <param name="DirectoryPath">Full path to directory </param>
+        /// <param name="AccessRight">File System right tested</param>
+        /// <returns>State [bool]</returns>
+        public static bool DirectoryHasPermission_Windows(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
+        {
+            if (!di.Exists)
+                return false;
+            
             // Requires nuget: System.IO.FileSystem.AccessControl 
             try
             {
@@ -301,7 +366,9 @@ namespace TestLucene.FileSearch
                     }
                 }
             }
-            catch { }
+            catch(System.Exception) 
+            { }
+            
             return false;
         }
 

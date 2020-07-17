@@ -249,6 +249,9 @@ namespace TestLucene.FileSearch
         }
 
 
+        // TODO: Better algorithm for cycle-detection 
+        // Something better than marking all visited nodes ...
+        // https://en.wikipedia.org/wiki/Cycle_detection
         public static bool IsCyclicSymlink(System.IO.FileSystemInfo fi)
         {
             string target = null;

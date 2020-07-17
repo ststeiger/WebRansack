@@ -1,4 +1,6 @@
 ﻿
+using System;
+using System.IO;
 using DocumentFormat.OpenXml.Drawing;
 
 namespace TestLucene.FileSearch
@@ -108,7 +110,7 @@ namespace TestLucene.FileSearch
             // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
             // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
             // return System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-
+            
             return System.IO.Path.GetFullPath(
                 System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "..")
             );
@@ -224,7 +226,7 @@ namespace TestLucene.FileSearch
         {
             return pathInfo.Attributes.HasFlag(System.IO.FileAttributes.ReparsePoint);
         } // End Function IsSymLink 
-
+        
 
         private static bool IsSymLink(string path)
         {
@@ -235,39 +237,15 @@ namespace TestLucene.FileSearch
         } // End Function IsSymLink 
 
 
-        public static string GetSymlinkTarget(System.IO.FileSystemInfo di)
-        {
-            string target = null;
-            
-            if(!IsSymLink(di))
-                throw new System.ArgumentException("\"" + di.FullName+"\" is not a symlink...");
-            
-            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
-            {
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                Mono.Unix.Native.Syscall.readlink(di.FullName, sb);
-                target = sb.ToString();
-                sb.Clear();
-                sb = null;
-                if(target != null)
-                    target = target.TrimEnd('\0');
-            } // End if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
-            else
-                target = CrapLord.WindowsNativeMethods.GetFinalPathName(di.FullName);
-
-            if (string.IsNullOrWhiteSpace(target))
-                return null;
-            
-            target = System.IO.Path.GetFullPath(target);
-            return target;
-        } // End Function GetSymlinkTarget 
-
 
         public static bool IsDirectory(string path)
         {
+            if (!System.IO.File.Exists(path) && !System.IO.Directory.Exists(path))
+                return false;
+            
             // get the file attributes for file or directory
             System.IO.FileAttributes attr = System.IO.File.GetAttributes(path);
-
+            
             if (attr.HasFlag(System.IO.FileAttributes.Directory))
                 return true;
 
@@ -277,53 +255,66 @@ namespace TestLucene.FileSearch
 
         public static bool IsCyclicSymlink(System.IO.FileSystemInfo fi)
         {
-            if (!IsSymLink(fi))
+            string target = null;
+            
+            try
             {
-                return false;
+                if (!IsSymLink(fi))
+                {
+                    return false;
+                }
+                
+                target = CrapLord.AbstractNativeMethods.GetSymlinkTarget(fi);
+                
+                // Invalid symlinks 
+                if (string.IsNullOrWhiteSpace(target))
+                    return true;
+
+                // A link to a file will never be cyclic - or can it ? 
+                // this allows /etc/nginx/sites-enabled/foo => /etc/nginx/sites-available/foo 
+                // /opt/microsoft/powershell/7/libssl.so.1.0.0 does not exist...
+                if (!IsDirectory(target))
+                    return false;
+
+                // if (fi.FullName.StartsWith("/proc", System.StringComparison.OrdinalIgnoreCase)) return true;
+                // if (fi.FullName.StartsWith("/sys", System.StringComparison.OrdinalIgnoreCase)) return true;
+
+                // a symlink to the root directory will always be cyclic 
+                if (string.Equals("/", target))
+                    return true;
+
+                // a symlink to the root directory if root is not / 
+                if (string.Equals(System.IO.Path.GetPathRoot(fi.FullName), target))
+                    return true;
+
+                // a self-referencing symlink - possible ? 
+                if (string.Equals(fi.FullName, target))
+                    return true;
+
+                // a symlink that goes somewhere into the parent directory of symlink 
+                // e.g. if /foo/bar/foobar/symlink goes to /foo/bar
+                if (fi.FullName.StartsWith(target, System.StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+
+                // gets the parent directoy of symlink /home/username/ for /home/username/symlink
+                System.IO.DirectoryInfo parent = System.IO.Directory.GetParent(fi.FullName);
+
+                // allow a symlink to another subdirectory of parent directory 
+                // eg /opt/java/current to /opt/java/v8/
+                // home/mygithub/username ==> home/github/username
+                // is this potentially dangerous ? 
+                if (target.StartsWith(parent.FullName) && !string.Equals(target, parent.FullName))
+                    return false;
             }
-
-            string target = GetSymlinkTarget(fi);
-
-            // Invalid symlinks 
-            if (string.IsNullOrWhiteSpace(target))
-                return true;
-
-            // A link to a file will never be cyclic - or can it ? 
-            // this allows /etc/nginx/sites-enabled/foo => /etc/nginx/sites-available/foo 
-            if (!IsDirectory(target))
-                return false;
-
-            // if (fi.FullName.StartsWith("/proc", System.StringComparison.OrdinalIgnoreCase)) return true;
-            // if (fi.FullName.StartsWith("/sys", System.StringComparison.OrdinalIgnoreCase)) return true;
-
-            // a symlink to the root directory will always be cyclic 
-            if (string.Equals("/", target))
-                return true;
-
-            // a symlink to the root directory if root is not / 
-            if (string.Equals(System.IO.Path.GetPathRoot(fi.FullName), target))
-                return true;
-
-            // a self-referencing symlink - possible ? 
-            if (string.Equals(fi.FullName, target))
-                return true;
-
-            // a symlink that goes somewhere into the parent directory of symlink 
-            // e.g. if /foo/bar/foobar/symlink goes to /foo/bar
-            if (fi.FullName.StartsWith(target, System.StringComparison.OrdinalIgnoreCase))
-                return true;
-
-
-            // gets the parent directoy of symlink /home/username/ for /home/username/symlink
-            System.IO.DirectoryInfo parent = System.IO.Directory.GetParent(fi.FullName);
-
-            // allow a symlink to another subdirectory of parent directory 
-            // eg /opt/java/current to /opt/java/v8/
-            // home/mygithub/username ==> home/github/username
-            // is this potentially dangerous ? 
-            if (target.StartsWith(parent.FullName) && !string.Equals(target, parent.FullName))
-                return false;
-
+            catch (System.Exception e)
+            {
+                System.Console.WriteLine(fi.FullName);
+                System.Console.WriteLine(target);
+                System.Console.WriteLine(e);
+                throw;
+            }
+            
             return true;
         } // End Function IsCyclicSymlink 
         

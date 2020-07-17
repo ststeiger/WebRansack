@@ -1,11 +1,5 @@
 ﻿
-using System;
-using System.IO;
-using System.Security.AccessControl;
-using System.Security.Principal;
-using HtmlAgilityPack;
-using Mono.Unix;
-using Mono.Unix.Native;
+using DocumentFormat.OpenXml.Drawing;
 
 namespace TestLucene.FileSearch
 {
@@ -224,14 +218,23 @@ namespace TestLucene.FileSearch
             } // Next thisDisk 
 
         } // End Function GetDrivesRoot 
-        
-        
+
+
         private static bool IsSymLink(System.IO.FileSystemInfo pathInfo)
         {
             return pathInfo.Attributes.HasFlag(System.IO.FileAttributes.ReparsePoint);
         } // End Function IsSymLink 
-        
-        
+
+
+        private static bool IsSymLink(string path)
+        {
+            // get the file attributes for file or directory
+            System.IO.FileAttributes attr = System.IO.File.GetAttributes(path);
+
+            return attr.HasFlag(System.IO.FileAttributes.ReparsePoint);
+        } // End Function IsSymLink 
+
+
         public static string GetSymlinkTarget(System.IO.FileSystemInfo di)
         {
             string target = null;
@@ -258,8 +261,20 @@ namespace TestLucene.FileSearch
             target = System.IO.Path.GetFullPath(target);
             return target;
         } // End Function GetSymlinkTarget 
-        
-        
+
+
+        public static bool IsDirectory(string path)
+        {
+            // get the file attributes for file or directory
+            System.IO.FileAttributes attr = System.IO.File.GetAttributes(path);
+
+            if (attr.HasFlag(System.IO.FileAttributes.Directory))
+                return true;
+
+            return false;
+        }
+
+
         public static bool IsCyclicSymlink(System.IO.FileSystemInfo fi)
         {
             if (!IsSymLink(fi))
@@ -267,45 +282,48 @@ namespace TestLucene.FileSearch
                 return false;
             }
 
-            if (fi.FullName.StartsWith("/proc", StringComparison.OrdinalIgnoreCase))
-                return true;
-            
-            if (fi.FullName.StartsWith("/sys", StringComparison.OrdinalIgnoreCase))
-                return true;
-            
             string target = GetSymlinkTarget(fi);
+
+            // Invalid symlinks 
             if (string.IsNullOrWhiteSpace(target))
                 return true;
 
+            // A link to a file will never be cyclic - or can it ? 
+            // this allows /etc/nginx/sites-enabled/foo => /etc/nginx/sites-available/foo 
+            if (!IsDirectory(target))
+                return false;
+
+            // if (fi.FullName.StartsWith("/proc", System.StringComparison.OrdinalIgnoreCase)) return true;
+            // if (fi.FullName.StartsWith("/sys", System.StringComparison.OrdinalIgnoreCase)) return true;
+
+            // a symlink to the root directory will always be cyclic 
             if (string.Equals("/", target))
                 return true;
 
+            // a symlink to the root directory if root is not / 
             if (string.Equals(System.IO.Path.GetPathRoot(fi.FullName), target))
                 return true;
 
-            // self-reference 
+            // a self-referencing symlink - possible ? 
             if (string.Equals(fi.FullName, target))
                 return true;
 
-
+            // a symlink that goes somewhere into the parent directory of symlink 
             // e.g. if /foo/bar/foobar/symlink goes to /foo/bar
             if (fi.FullName.StartsWith(target, System.StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            // /home/username/ for /home/username/symlink
+
+            // gets the parent directoy of symlink /home/username/ for /home/username/symlink
             System.IO.DirectoryInfo parent = System.IO.Directory.GetParent(fi.FullName);
 
-            // allow a symlink to another subdirectory
+            // allow a symlink to another subdirectory of parent directory 
             // eg /opt/java/current to /opt/java/v8/
+            // home/mygithub/username ==> home/github/username
+            // is this potentially dangerous ? 
             if (target.StartsWith(parent.FullName) && !string.Equals(target, parent.FullName))
                 return false;
 
-            // home/github/ststeiger/repo
-            // home/mygithub/ststeiger
-
-            // /foo/bar/lol
-            // /foo/bar/current
-            
             return true;
         } // End Function IsCyclicSymlink 
         
@@ -313,7 +331,7 @@ namespace TestLucene.FileSearch
         // https://stackoverflow.com/questions/45132081/file-permissions-on-linux-unix-with-net-core
         private static bool DirectoryHasPermission_Unix(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
         {
-            int res = Mono.Unix.Native.Syscall.access(di.FullName, AccessModes.F_OK | AccessModes.R_OK);
+            int res = Mono.Unix.Native.Syscall.access(di.FullName, Mono.Unix.Native.AccessModes.F_OK | Mono.Unix.Native.AccessModes.R_OK);
             return res == 0;
             
             /*
@@ -414,7 +432,7 @@ namespace TestLucene.FileSearch
             try
             {
                 System.Security.AccessControl.AuthorizationRuleCollection rules = System.IO.FileSystemAclExtensions.GetAccessControl(di).GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
-                WindowsIdentity identity = WindowsIdentity.GetCurrent();
+                System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
 
                 // https://stackoverflow.com/questions/1410127/c-sharp-test-if-user-has-write-access-to-a-folder
                 // AccessControlType deny takes precedence over allow, so to be completely thorough rules that deny the access right should be checked as well, 
@@ -508,7 +526,7 @@ namespace TestLucene.FileSearch
                             stack.Push(dir);
                         else
                         {
-                            Console.WriteLine(f.FullName);
+                            System.Console.WriteLine(f.FullName);
                         }
                         
                         continue;
@@ -567,7 +585,7 @@ namespace TestLucene.FileSearch
                 foreach (System.IO.FileInfo thisFile in IterativelyEnumerate(thisRootDirectory,
                     delegate (System.IO.FileInfo fi)
                     {
-                        if (".ini".Equals(fi.Extension, StringComparison.InvariantCultureIgnoreCase))
+                        if (".ini".Equals(fi.Extension, System.StringComparison.InvariantCultureIgnoreCase))
                             return true;
 
                         return false;

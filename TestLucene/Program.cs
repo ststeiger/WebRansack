@@ -1,6 +1,4 @@
 ﻿
-using Mono.Unix;
-
 namespace TestLucene
 {
 
@@ -10,24 +8,6 @@ namespace TestLucene
     // https://www.codeproject.com/Articles/609980/Small-Lucene-NET-Demo-App
     class Program
     {
-
-
-        public static void foo()
-        {
-            System.IO.FileInfo fi;
-            
-            // Mono.Unix.UnixUserInfo ui = new Mono.Unix.UnixUserInfo(123);
-            // Mono.Unix.UnixGroupInfo gi = new Mono.Unix.UnixGroupInfo(123);
-            // Mono.Unix.UnixDriveInfo drv = new Mono.Unix.UnixDriveInfo("/");
-            // Mono.Unix.UnixSymbolicLinkInfo si = new Mono.Unix.UnixSymbolicLinkInfo("");
-            
-            // Mono.Unix.UnixDirectoryInfo di = new Mono.Unix.UnixDirectoryInfo("");
-            // Mono.Unix.UnixFileInfo fi = new Mono.Unix.UnixFileInfo("test.txt");
-
-            Mono.Unix.UnixFileSystemInfo fsi = Mono.Unix.UnixFileSystemInfo.GetFileSystemEntry("path");
-
-        }
-
 
 
         // https://antoinevastel.com/bot%20detection/2018/01/17/detect-chrome-headless-v2.html

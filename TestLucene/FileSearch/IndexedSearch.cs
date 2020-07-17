@@ -322,66 +322,8 @@ namespace TestLucene.FileSearch
         // https://stackoverflow.com/questions/45132081/file-permissions-on-linux-unix-with-net-core
         private static bool DirectoryHasPermission_Unix(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
         {
-            int res = Mono.Unix.Native.Syscall.access(di.FullName, Mono.Unix.Native.AccessModes.F_OK | Mono.Unix.Native.AccessModes.R_OK);
+            int res = CrapLord.MonoSux.access(di.FullName, CrapLord.MonoSux.AccessModes.F_OK | CrapLord.MonoSux.AccessModes.R_OK);
             return res == 0;
-            
-            /*
-            Mono.Unix.UnixFileInfo unixFileInfo = new Mono.Unix.UnixFileInfo("test.txt");
-            // set file permission to 644
-            unixFileInfo.FileAccessPermissions =
-                Mono.Unix.FileAccessPermissions.UserRead | Mono.Unix.FileAccessPermissions.UserWrite
-                | Mono.Unix.FileAccessPermissions.GroupRead
-                | Mono.Unix.FileAccessPermissions.OtherRead;
-            */
-            
-            // https://www.geeksforgeeks.org/access-control-listsacl-linux/
-            // https://www.tecmint.com/secure-files-using-acls-in-linux/
-            
-            // grep -i acl /boot/config*
-            // nm -D /lib/x86_64-linux-gnu/libacl.so.1 | grep "acl"
-            
-            // [on RedHat based systems]
-            // yum install nfs4-acl-tools acl libacl
-            // [on Debian based systems]
-            // sudo apt-get install nfs4-acl-tools acl
-            
-            // cat /proc/mounts
-            // df -h | grep " /$"
-            // mount | grep -i root
-            // ==>
-            // mount | grep `df -h | grep " /$" | awk '{print $1}'`
-            // tune2fs -l /dev/nvme0n1p2 | grep acl
-            // Mono.Unix.Native.Passwd ent = Mono.Unix.Native.Syscall.getpwent();
-            // Mono.Unix.Native.Syscall.getgrouplist()
-            
-            /*
-            if (AccessRight == FileSystemRights.Read)
-            {
-                Mono.Unix.UnixDirectoryInfo unixDirectoryInfo = new Mono.Unix.UnixDirectoryInfo(di.FullName);
-                return (unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.UserRead)
-                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.GroupRead)
-                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.OtherRead)
-                    );
-            }
-            else if (AccessRight == FileSystemRights.Write)
-            {
-                Mono.Unix.UnixDirectoryInfo unixDirectoryInfo = new Mono.Unix.UnixDirectoryInfo(di.FullName);
-                return (unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.UserWrite)
-                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.GroupWrite)
-                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.OtherWrite)
-                    );
-            }
-            else if (AccessRight == FileSystemRights.ExecuteFile)
-            {
-                Mono.Unix.UnixDirectoryInfo unixDirectoryInfo = new Mono.Unix.UnixDirectoryInfo(di.FullName);
-                return (unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.UserExecute)
-                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.GroupExecute)
-                        || unixDirectoryInfo.FileAccessPermissions.HasFlag(FileAccessPermissions.OtherExecute)
-                    );
-            }
-            */
-            
-            throw new System.NotImplementedException("AccessRight for \"" + AccessRight.ToString() + "\"");
         } // End Function DirectoryHasPermission_Unix 
         
         

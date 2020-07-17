@@ -231,6 +231,55 @@ namespace TestLucene.FileSearch
         } // End Function IsSymLink 
         
         
+        public static string GetSymlinkTarget(System.IO.FileSystemInfo di)
+        {
+            string target = null;
+            
+            if(!IsSymLink(di))
+                throw new System.ArgumentException("\"" + di.FullName+"\" is not a symlink...");
+            
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+            {
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                Mono.Unix.Native.Syscall.readlink(di.FullName, sb);
+                target = sb.ToString();
+                sb.Clear();
+                sb = null;
+                if(target != null)
+                    target = target.TrimEnd('\0');
+            } // End if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+            else
+                target = CrapLord.WindowsNativeMethods.GetFinalPathName(di.FullName);
+
+            if (string.IsNullOrWhiteSpace(target))
+                return null;
+            
+            target = System.IO.Path.GetFullPath(target);
+            return target;
+        } // End Function GetSymlinkTarget 
+        
+        
+        public static bool IsCyclicSymlink(System.IO.FileSystemInfo fi)
+        {
+            if (!IsSymLink(fi))
+            {
+                return false;
+            }
+
+            if (fi.FullName.StartsWith("/proc", StringComparison.OrdinalIgnoreCase))
+                return true;
+            
+            if (fi.FullName.StartsWith("/sys", StringComparison.OrdinalIgnoreCase))
+                return true;
+            
+            string target = GetSymlinkTarget(fi);
+            if (string.IsNullOrWhiteSpace(target))
+                return true;
+            
+            return fi.FullName.StartsWith(target, System.StringComparison.OrdinalIgnoreCase);
+        } // End Function IsCyclicSymlink 
+        
+
         // https://stackoverflow.com/questions/45132081/file-permissions-on-linux-unix-with-net-core
         private static bool DirectoryHasPermission_Unix(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
         {
@@ -371,8 +420,8 @@ namespace TestLucene.FileSearch
             
             return false;
         }
-
-
+        
+        
         public static System.Collections.Generic.IEnumerable<System.IO.FileInfo> IterativelyEnumerate(
               System.IO.DirectoryInfo initialPath,
               System.Func<System.IO.FileInfo, bool> selector
@@ -391,7 +440,10 @@ namespace TestLucene.FileSearch
             {
                 n++;
                 System.IO.DirectoryInfo di = stack.Pop();
-
+                
+                if(IsCyclicSymlink(di))
+                    continue;
+                
                 System.IO.FileSystemInfo[] entries = null;
                 try
                 {
@@ -411,6 +463,7 @@ namespace TestLucene.FileSearch
                     // still one bug: 'C:\ProgramData\Microsoft\NetFramework\BreadcrumbStore'
                     System.Console.WriteLine(ex.Message);
                     System.Console.WriteLine(ex.StackTrace);
+                    System.Console.WriteLine(di.FullName);
                     continue;
                 }
 
@@ -420,13 +473,21 @@ namespace TestLucene.FileSearch
                 {
                     if (f.IsDirectory())
                     {
-                        stack.Push((System.IO.DirectoryInfo)f);
+                        System.IO.DirectoryInfo dir = f as System.IO.DirectoryInfo;
+                        if(dir != null)
+                            stack.Push(dir);
+                        else
+                        {
+                            Console.WriteLine(f.FullName);
+                        }
+                        
                         continue;
                     }
-
-                    if (IsSymLink(f))
+                    
+                    // if (IsSymLink(f)) continue;
+                    if(IsCyclicSymlink(f))
                         continue;
-
+                    
                     // if (f.IsHidden()) continue;
 
                     n++;

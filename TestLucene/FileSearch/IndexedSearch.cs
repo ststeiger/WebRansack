@@ -1,8 +1,4 @@
 ﻿
-using System;
-using System.IO;
-using DocumentFormat.OpenXml.Drawing;
-
 namespace TestLucene.FileSearch
 {
 

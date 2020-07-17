@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using HtmlAgilityPack;
 using Mono.Unix;
 using Mono.Unix.Native;
 
@@ -275,8 +276,37 @@ namespace TestLucene.FileSearch
             string target = GetSymlinkTarget(fi);
             if (string.IsNullOrWhiteSpace(target))
                 return true;
+
+            if (string.Equals("/", target))
+                return true;
+
+            if (string.Equals(System.IO.Path.GetPathRoot(fi.FullName), target))
+                return true;
+
+            // self-reference 
+            if (string.Equals(fi.FullName, target))
+                return true;
+
+
+            // e.g. if /foo/bar/foobar/symlink goes to /foo/bar
+            if (fi.FullName.StartsWith(target, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // /home/username/ for /home/username/symlink
+            System.IO.DirectoryInfo parent = System.IO.Directory.GetParent(fi.FullName);
+
+            // allow a symlink to another subdirectory
+            // eg /opt/java/current to /opt/java/v8/
+            if (target.StartsWith(parent.FullName) && !string.Equals(target, parent.FullName))
+                return false;
+
+            // home/github/ststeiger/repo
+            // home/mygithub/ststeiger
+
+            // /foo/bar/lol
+            // /foo/bar/current
             
-            return fi.FullName.StartsWith(target, System.StringComparison.OrdinalIgnoreCase);
+            return true;
         } // End Function IsCyclicSymlink 
         
 

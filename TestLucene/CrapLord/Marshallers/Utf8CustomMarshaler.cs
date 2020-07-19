@@ -13,31 +13,17 @@ namespace TestLucene.CrapLord
         private static readonly System.Action<int> s_setLastWin32Error;
         
         
-        private static System.Action<int> CreateSetter(System.Reflection.MethodInfo mtd)
-        {
-            // Object's type:
-            System.Linq.Expressions.ParameterExpression valueExp = System.Linq.Expressions.Expression.Parameter(typeof(int), "error");
-            // System.Linq.Expressions.Expression[] prams = new System.Linq.Expressions.Expression[] {valueExp};
-            System.Linq.Expressions.ParameterExpression[] prams2 = new System.Linq.Expressions.ParameterExpression[] {valueExp};
-            System.Linq.Expressions.Expression methodCall = System.Linq.Expressions.Expression.Call(null, mtd, prams2);
-            
-            System.Action<int> invoker = System.Linq.Expressions.Expression.Lambda<System.Action<int>>(methodCall, false, prams2).Compile();
-            return invoker;
-        }
-        
-        
         static Utf8CustomMarshaler()
         {
             System.Type t = typeof(System.Runtime.InteropServices.Marshal);
             System.Reflection.MethodInfo mi = t.GetMethod("SetLastWin32Error", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
             // mi.Invoke(null, new object[] { (object)lastError });
-            s_setLastWin32Error = CreateSetter(mi);
-            
+            s_setLastWin32Error = (System.Action<int>) mi.CreateDelegate(typeof(System.Action<int>));    
             s_staticInstance = new Utf8CustomMarshaler();
         }
 
-
-
+        
+        
         System.IntPtr System.Runtime.InteropServices.ICustomMarshaler.MarshalManagedToNative(object objManagedObj)
         {
             string managedObj = objManagedObj as string;
@@ -104,58 +90,6 @@ namespace TestLucene.CrapLord
             return str;
             // return Instance.MarshalNativeToManaged(pNativeData);
         }
-        
-        
-        public static T2[] MapArray<T1, T2>(T1[] array, System.Func<T1, T2> map)
-        {
-            T2[] newArray = new T2[array.Length];
-            
-            for (int i = 0; i < array.Length; ++i)
-            {
-                newArray[i] = map(array[i]);
-            } // Next i 
-            
-            return newArray;
-        } // End Function MapArray 
-        
-        
-        public static System.Collections.Generic.List<T2> MapList<T1, T2>(System.Collections.Generic.IEnumerable<T1> array, System.Func<T1, T2> map)
-        {
-            System.Collections.Generic.List<T2> newList = new System.Collections.Generic.List<T2>();
-            
-            foreach (T1 thisElement in array)
-            {
-                newList.Add(map(thisElement));
-            } // Next 
-            
-            return newList;
-        } // End Function MapList 
-
-
-        public static System.Delegate MakeCompiledMethod(System.Reflection.MethodInfo mtd)
-        {
-            if (mtd == null)
-                throw new System.ArgumentNullException("mtd mustn't be null");
-
-            System.Reflection.ParameterInfo[] pis = mtd.GetParameters();
-            // System.Linq.Expressions.ParameterExpression[] prams = MapArray(pis,pi=> System.Linq.Expressions.Expression.Parameter(pi.ParameterType, pi.Name));
-            System.Collections.Generic.List<System.Linq.Expressions.ParameterExpression> prams = MapList(pis,
-                pi => System.Linq.Expressions.Expression.Parameter(pi.ParameterType, pi.Name));
-            
-            //var prams = mtd.GetParameters().Select(p => System.Linq.Expressions.Expression.Parameter(p.ParameterType, p.Name)).ToList();
-            System.Linq.Expressions.Expression methodCall;
-            if (mtd.IsStatic) 
-                methodCall = System.Linq.Expressions.Expression.Call(null, mtd, prams);
-            else
-            {
-                // on instance-Methods the ownerInstance must be included
-                System.Linq.Expressions.ParameterExpression ownerInstance = System.Linq.Expressions.Expression.Variable(mtd.DeclaringType, "ownerInstance");
-                methodCall = System.Linq.Expressions.Expression.Call(ownerInstance, mtd, prams);
-                prams.Insert(0, ownerInstance);
-            }
-            
-            return System.Linq.Expressions.Expression.Lambda(methodCall, false, prams).Compile();
-        } // End Function MakeCompiledMethod 
         
         
         void System.Runtime.InteropServices.ICustomMarshaler.CleanUpNativeData(System.IntPtr pNativeData)

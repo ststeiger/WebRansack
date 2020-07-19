@@ -203,17 +203,6 @@ namespace TestLucene.CrapLord
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.InteropServices.DllImport(LIBC, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "readlink", SetLastError = true)]
 #if USE_LPUTF8Str
-        internal static extern long readlink([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] string path, char[] buf, ulong bufsiz);
-#else
-        internal static extern long readlink([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(FileNameMarshaler))] string path, char[] buf, ulong bufsiz);
-#endif
-        
-        
-        // ssize_t readlink(const char *path, char *buf, size_t bufsiz);
-        // https://linux.die.net/man/2/readlink
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [System.Runtime.InteropServices.DllImport(LIBC, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, EntryPoint = "readlink", SetLastError = true)]
-#if USE_LPUTF8Str
         internal static extern long readlink([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] string path, byte[] buf, ulong bufsiz);
 #else
         internal static extern long readlink([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(FileNameMarshaler))] string path, byte[] buf, ulong bufsiz);
@@ -225,13 +214,12 @@ namespace TestLucene.CrapLord
             get
             {
                 // How would you guarantee that the runtime has not called some CRT function 
-                // during its internal processing that has affected the errno?
-
+                // during its internal processing that has affected the errno ?
                 // For the same reason, you should not call GetLastError directly either. 
                 // The DllImportAttribute provides a SetLastError property so the runtime knows 
                 // to immediately capture the last error and store it in a place that the managed code 
                 // can read using Marshal.GetLastWin32Error.
-
+                
                 // this work on Linux !
                 // Marshal.GetLastWin32Error can be used to retrieve errno.
                 int num = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
@@ -319,7 +307,9 @@ namespace TestLucene.CrapLord
         {
             string target = null;
             
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            // Need to set capacity to maximum, otherwise, default is 16...
+            // (otherwise truncation after 16 characters)
+            System.Text.StringBuilder sb = new System.Text.StringBuilder(4096);
             // Mono.Unix.Native.Syscall.readlink(path, sb);
             target = sb.ToString();
             sb.Clear();

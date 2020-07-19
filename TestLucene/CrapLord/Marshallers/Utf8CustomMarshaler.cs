@@ -1,8 +1,5 @@
-﻿
-namespace TestLucene.CrapLord
+﻿namespace TestLucene.CrapLord
 {
-    
-    
     /// <summary>
     /// Marshaller for UTF8 strings.
     /// </summary>
@@ -11,29 +8,29 @@ namespace TestLucene.CrapLord
     {
         private static readonly Utf8CustomMarshaler s_staticInstance;
         private static readonly System.Action<int> s_setLastWin32Error;
-        
-        
+
+
         static Utf8CustomMarshaler()
         {
             System.Type t = typeof(System.Runtime.InteropServices.Marshal);
-            System.Reflection.MethodInfo mi = t.GetMethod("SetLastWin32Error", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            System.Reflection.MethodInfo mi = t.GetMethod("SetLastWin32Error",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
             // mi.Invoke(null, new object[] { (object)lastError });
-            s_setLastWin32Error = (System.Action<int>) mi.CreateDelegate(typeof(System.Action<int>));    
+            s_setLastWin32Error = (System.Action<int>) mi.CreateDelegate(typeof(System.Action<int>));
             s_staticInstance = new Utf8CustomMarshaler();
         }
 
-        
-        
+
         System.IntPtr System.Runtime.InteropServices.ICustomMarshaler.MarshalManagedToNative(object objManagedObj)
         {
             string managedObj = objManagedObj as string;
-            
+
             if (managedObj == null)
                 return System.IntPtr.Zero;
-            
+
             // not null terminated
             byte[] strbuf = System.Text.Encoding.UTF8.GetBytes(managedObj);
-            
+
             System.IntPtr buffer = System.Runtime.InteropServices.Marshal.AllocHGlobal(strbuf.Length + 1);
             System.Runtime.InteropServices.Marshal.Copy(strbuf, 0, buffer, strbuf.Length);
 
@@ -46,8 +43,8 @@ namespace TestLucene.CrapLord
 
             return buffer;
         } // End Function MarshalManagedToNative 
-        
-        
+
+
         /*
         unsafe object System.Runtime.InteropServices.ICustomMarshaler.MarshalNativeToManaged(System.IntPtr pNativeData)
         {
@@ -72,8 +69,8 @@ namespace TestLucene.CrapLord
             return data;
         } // End Function MarshalNativeToManaged 
         */
-        
-        
+
+
         object System.Runtime.InteropServices.ICustomMarshaler.MarshalNativeToManaged(System.IntPtr pNativeData)
         {
             int i = 0;
@@ -81,43 +78,40 @@ namespace TestLucene.CrapLord
             {
                 ++i;
             } // Whend 
-            
+
             byte[] ba = new byte[i];
             System.Runtime.InteropServices.Marshal.Copy(pNativeData, ba, 0, i);
             string str = System.Text.Encoding.UTF8.GetString(ba);
-            
+
             // System.Console.WriteLine(str);
             return str;
             // return Instance.MarshalNativeToManaged(pNativeData);
         }
-        
-        
+
+
         void System.Runtime.InteropServices.ICustomMarshaler.CleanUpNativeData(System.IntPtr pNativeData)
         {
             int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
             System.Runtime.InteropServices.Marshal.FreeHGlobal(pNativeData);
             s_setLastWin32Error(lastError);
         } // End Function CleanUpNativeData 
-        
-        
+
+
         void System.Runtime.InteropServices.ICustomMarshaler.CleanUpManagedData(object pNativeData)
-        { }
-        
-        
+        {
+        }
+
+
         int System.Runtime.InteropServices.ICustomMarshaler.GetNativeDataSize()
         {
             return System.IntPtr.Size;
         } // End Function GetNativeDataSize 
-        
-        
+
+
         // This is required for CustomMarshal apart from implementing the interface ! 
         public static System.Runtime.InteropServices.ICustomMarshaler GetInstance(string cookie)
         {
             return s_staticInstance;
         } // End Function GetInstance 
-        
-        
     } // End Class Utf8CustomMarshaler 
-    
-    
 } // End Namespace 

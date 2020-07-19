@@ -1,24 +1,21 @@
-﻿
-namespace TestLucene.CrapLord
+﻿namespace TestLucene.CrapLord
 {
-    
-    
     public class Utf8ConstCustomMarshaler
         : System.Runtime.InteropServices.ICustomMarshaler
     {
         private static readonly Utf8ConstCustomMarshaler s_staticInstance;
-        
-        
+
+
         static Utf8ConstCustomMarshaler()
         {
             s_staticInstance = new Utf8ConstCustomMarshaler();
         }
-        
-        
+
+
         System.IntPtr System.Runtime.InteropServices.ICustomMarshaler.MarshalManagedToNative(object objManagedObj)
         {
             string managedObj = objManagedObj as string;
-            
+
             if (managedObj == null)
                 return System.IntPtr.Zero;
 
@@ -46,16 +43,16 @@ namespace TestLucene.CrapLord
             {
                 ++i;
             } // Whend 
-            
+
             byte[] ba = new byte[i];
             System.Runtime.InteropServices.Marshal.Copy(pNativeData, ba, 0, i);
             string str = System.Text.Encoding.UTF8.GetString(ba);
-            
+
             // System.Console.WriteLine(str);
             return str;
             // return Instance.MarshalNativeToManaged(pNativeData);
         }
-        
+
         /*
         unsafe object System.Runtime.InteropServices.ICustomMarshaler.MarshalNativeToManaged(System.IntPtr pNativeData)
         {
@@ -81,33 +78,30 @@ namespace TestLucene.CrapLord
             return data;
         }
         */
-        
-        
+
+
         void System.Runtime.InteropServices.ICustomMarshaler.CleanUpNativeData(System.IntPtr pNativeData)
         {
             // SigSegV Segmentation Fault - You cannot free a const-string
             // Marshal.FreeHGlobal(pNativeData);
             // Mono.Unix.Native.Stdlib.free(pNativeData);
         }
-        
-        
+
+
         void System.Runtime.InteropServices.ICustomMarshaler.CleanUpManagedData(object managedObj)
-        { }
-        
-        
+        {
+        }
+
+
         int System.Runtime.InteropServices.ICustomMarshaler.GetNativeDataSize()
         {
             return System.IntPtr.Size;
         }
-        
-        
+
+
         public static System.Runtime.InteropServices.ICustomMarshaler GetInstance(string cookie)
         {
             return s_staticInstance;
         }
-        
-        
     } // End Class ConstUtf8Marshaler 
-    
-    
 } // End Namespace 

@@ -1,4 +1,6 @@
 ﻿
+using TestLucene.CrapLord;
+
 namespace TestLucene.FileSearch
 {
 
@@ -319,10 +321,9 @@ namespace TestLucene.FileSearch
         
 
         // https://stackoverflow.com/questions/45132081/file-permissions-on-linux-unix-with-net-core
-        private static bool DirectoryHasPermission_Unix(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
+        private static unsafe bool DirectoryHasPermission_Unix(System.IO.DirectoryInfo di, System.Security.AccessControl.FileSystemRights AccessRight)
         {
-            int res = CrapLord.MonoSux.access(di.FullName, CrapLord.MonoSux.AccessModes.F_OK | CrapLord.MonoSux.AccessModes.R_OK);
-            return res == 0;
+            return CrapLord.LinuxNativeMethods.Access(di.FullName, CrapLord.LinuxNativeMethods.AccessModes.F_OK | CrapLord.LinuxNativeMethods.AccessModes.R_OK);
         } // End Function DirectoryHasPermission_Unix 
         
         

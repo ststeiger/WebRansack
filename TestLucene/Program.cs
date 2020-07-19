@@ -8,8 +8,8 @@ namespace TestLucene
     // https://www.codeproject.com/Articles/609980/Small-Lucene-NET-Demo-App
     class Program
     {
-
-
+        
+        
         // https://antoinevastel.com/bot%20detection/2018/01/17/detect-chrome-headless-v2.html
         // https://www.urbandictionary.com/define.php?term=LART
         // http://texrights.org/2017/02/20/article-about-microsoft-cult-tactics/

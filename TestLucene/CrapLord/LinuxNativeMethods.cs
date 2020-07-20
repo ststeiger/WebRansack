@@ -246,6 +246,8 @@ namespace TestLucene.CrapLord
         }
         
         
+        
+        
         /// <summary>
         /// access() checks whether the calling process can access the file pathname. If pathname is a symbolic link, it is dereferenced.
         /// </summary>
@@ -255,7 +257,6 @@ namespace TestLucene.CrapLord
         public static bool Access(string pathmame, AccessModes mode)
         {
             int ret = access(pathmame, mode);
-            
             if (ret == -1)
             {
                 Errno err = errno;

@@ -3,8 +3,6 @@ namespace TestLucene.CrapLord
 {
     
     
-    
-    
     public static class WindowsNativeMethods
     {
         private static readonly System.IntPtr INVALID_HANDLE_VALUE = new System.IntPtr(-1);
@@ -57,5 +55,9 @@ namespace TestLucene.CrapLord
                 CloseHandle(h);
             }
         }
+        
+        
     }
+    
+    
 }

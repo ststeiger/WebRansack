@@ -136,7 +136,7 @@ namespace WebRansack
             app.UseRansackSearch("/ransack");
             app.UseRansackSearchAndReplace("/sar");
             app.UseTable("/table");
-            
+            app.UseFileContents("/textfile");
             
             app.UseMvc(routes =>
             {

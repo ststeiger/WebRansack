@@ -78,7 +78,7 @@ namespace WebRansack
 
         public static void Main(string[] args)
         {
-            _ = PeriodicTask(10, System.Threading.CancellationToken.None);
+            // _ = PeriodicTask(10, System.Threading.CancellationToken.None);
             BuildWebHost(args).Run();
         }
         

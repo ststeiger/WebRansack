@@ -1,0 +1,61 @@
+﻿
+table.altBlue
+{
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.25cm;
+    position: relative;
+}
+
+table.altBlue *
+{
+    font-family: Tahoma;
+    #font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+}
+
+table.altBlue th
+{
+    background-color: #4472C4;
+    color: white;
+    white-space: nowrap;
+    font-weight: bold;
+    text-align: left;
+    position: sticky;
+    top: 0;
+}
+
+table.altBlue td, table.altBlue th
+{
+    border: 1px solid white;
+}
+
+table.altBlue th, table.altBlue td
+{
+    padding: 1mm;
+    vertical-align: middle;
+    display: table-cell;
+    line-height: 1.25em;
+}
+
+table.altBlue tbody tr:nth-child(even)
+{
+    background: #D9E1F2;
+}
+
+table.altBlue tbody tr:nth-child(odd)
+{
+    background: #B4C6E7;
+}
+
+
+table.altBlue tfoot tr
+{
+    background-color: #4472C4;
+    color: white;
+    white-space: nowrap;
+    font-weight: bold;
+    text-align: left;
+    position: sticky;
+    bottom: 0;
+}

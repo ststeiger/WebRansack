@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 
 namespace WebRansack
@@ -93,7 +94,32 @@ namespace WebRansack
                 }
 
             });
-        } // End Sub UseEcho 
+        } // End Sub UseTable 
+        
+        
+        
+        public static void UseFileContents(this Microsoft.AspNetCore.Builder.IApplicationBuilder app, string path)
+        {
+            Microsoft.AspNetCore.Http.PathString ps = new Microsoft.AspNetCore.Http.PathString(path);
+            
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path == ps)
+                {
+                    string filePath = context.Request.Query["file"].ToString();
+                    string content = await System.IO.File.ReadAllTextAsync(filePath);
+                    
+                    context.Response.StatusCode = 200;
+                    context.Response.ContentType = "text/plain; charset=utf-8";
+                    await context.Response.WriteAsync(content);
+                }
+                else
+                {
+                    await next();
+                }
+
+            });
+        } // End Sub UseTable 
 
 
     } // End Class WebSocketsTableExtensions 

@@ -1,0 +1,61 @@
+﻿
+table.altGreen
+{
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.25cm;
+    position: relative;
+}
+
+table.altGreen *
+{
+    font-family: Tahoma;
+    #font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+}
+
+table.altGreen th
+{
+    background-color: #70AD47;
+    color: white;
+    white-space: nowrap;
+    font-weight: bold;
+    text-align: left;
+    position: sticky;
+    top: 0;
+}
+
+table.altGreen td, table.altGreen th
+{
+    border: 1px solid white;
+}
+
+table.altGreen th, table.altGreen td
+{
+    padding: 1mm;
+    vertical-align: middle;
+    display: table-cell;
+    line-height: 1.25em;
+}
+
+table.altGreen tbody tr:nth-child(even)
+{
+    background: #E2EFDA;
+}
+
+table.altGreen tbody tr:nth-child(odd)
+{
+    background: #C6E0B4;
+}
+
+table.altGreen tfoot tr
+{
+    background-color: #70AD47;
+    color: white;
+    white-space: nowrap;
+    font-weight: bold;
+    text-align: left;
+
+    position: sticky;
+    bottom: 0;
+}

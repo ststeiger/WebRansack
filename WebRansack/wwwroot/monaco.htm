@@ -1,0 +1,833 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta charset="utf-8" />
+
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+
+    <title>Monaco Editor test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.00, minimum-scale=1.00, maximum-scale=1.00" />
+
+    <style type="text/css">
+
+        html, body
+        {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+    <script src="js/monaco-editor/min/vs/loader.js"></script>
+    <script src="js/tableWrapper.js"></script>
+</head>
+<body>
+<!-- 
+https://github.com/microsoft/monaco-editor/tree/main/samples
+-->
+
+
+    <div id="container" style="width:100%;height:100%;border:1px solid grey; "></div>
+    <br />
+    <!--
+    <input type="button" onclick="alert(window.editor.getValue());" value="Get Text" />
+    <input type="button" onclick="window.editor.setValue('SELECT * FROM T_Benutzer');" value="Set Text" />
+    <input type="button" onclick="alert(window.editor.getModel().getValueInRange(window.editor.getSelection()));" value="Get Selection" />
+    -->
+
+    <script type="text/javascript">
+
+
+        function encodeRfc3986(str)
+        {
+            return encodeURIComponent(str).replace(/[!'()*]/g, function (c)
+            {
+                return '%' + c.charCodeAt(0).toString(16);
+            });
+        }
+        
+        
+        function getSupportedLanguages()
+        {
+            var supportedLanguages = {
+                "abap": "abap",
+                "aes": "aes",
+                "apex": "apex",
+                "azcli": ["azcli", "az"],
+                "bat": ["bat", "cmd"],
+                "bicep": "bicep",
+                "c": ["c","h"],
+                "cameligo": ["mligo", "ligo", "religo", "jsligo"],
+                "clojure": "clj",
+                "coffeescript": ["coffee","litcoffee"],
+                "cpp": ["cpp", "hpp"],
+                "csharp": ["cs", "ashx", "asax"],
+                "csp": "csp",
+                "css": "css",
+                "dart": "dart",
+                "dockerfile": "",
+                "ecl": "ecl",
+                "elixir": ["ex", "exs"],
+                "flow9": "flow",
+                "freemarker2": "ftl",
+                "freemarker2.tag-angle.interpolation-bracket": "ftlab",
+                "freemarker2.tag-angle.interpolation-dollar": "ftla",
+                "freemarker2.tag-auto.interpolation-bracket": "ftlb",
+                "freemarker2.tag-auto.interpolation-dollar": "ftlad",
+                "freemarker2.tag-bracket.interpolation-bracket": "ftltb",
+                "freemarker2.tag-bracket.interpolation-dollar": "ftltbd",
+                "fsharp": ["fs", "fsi", "fsx", "fsscript"],
+                "go": "go",
+                "graphql": ["gql", "graphql"],
+                "handlebars": "hbs",
+                "hcl": ["hcl", "hdl"],
+                "html": ["html", "htm", "hta", "mht", "mhtml"],
+                "ini": "ini",
+                "java": "java",
+                "javascript": ["js", "mjs", "jsx"],
+                "json": "json",
+                "julia": "jl",
+                "kotlin": ["kt", "kts", "ktm"],
+                "less": "less",
+                "lexon": "lex",
+                "liquid": "liquid",
+                "lua": "lua",
+                "m3": "m3",
+                "markdown": "md",
+                "mips": "mips",
+                "msdax": "msdax",
+                "mysql": "mysql",
+                "objective-c": "oc",
+                "pascal": ["pa", "pp", "pas", "inc", "lpr", "tp"],
+                "pascaligo": "pal",
+                "perl": "pl",
+                "pgsql": "psql",
+                "php": "php",
+                "pla": "pla",
+                "plaintext": ["txt", "sln"],
+                "postiats": "postiats",
+                "powerquery": "pq",
+                "powershell": "ps1",
+                "proto": "proto",
+                "pug": "pug",
+                "python": "py",
+                "qsharp": "qs",
+                "r": "r",
+                "razor": "cshtml",
+                "redis": "redis",
+                "redshift": "redshift",
+                "restructuredtext": "rest",
+                "ruby": "rb",
+                "rust": "rs",
+                "sb": "sb",
+                "scala": "sc",
+                "scheme": "scm",
+                "scss": ["scss", "sass"],
+                "shell": "sh",
+                "sol": "sol",
+                "sparql": "sparql",
+                "sql": "sql",
+                "st": "st",
+                "swift": "swift",
+                "systemverilog": ["sv", "svh"],
+                "tcl": "tcl",
+                "twig": "twig",
+                "typescript": ["ts", "tsx"],
+                "vb": ["vb", "vba"],
+                "verilog": ["v", "vh"],
+                "xml": ["xml", "svg", "csproj", "vbproj", "config", "wsdl", "rdl", "resx", "myapp", "pubxml", "disco", "svcinfo", "svcmap"],
+                "yaml": "yaml"
+            }
+
+            var mapExtensions = {};
+            for (var supportedLanguageName in supportedLanguages) 
+            {
+                if (supportedLanguages.hasOwnProperty(supportedLanguageName)) 
+                {
+                    var x = supportedLanguages[supportedLanguageName];
+                    if(Array.isArray(x))
+                    {
+                        for(var i = 0; i < x.length; ++i)
+                        {
+                            mapExtensions[x[i]] = supportedLanguageName;
+                        }
+                    }
+                    else
+                        mapExtensions[x] = supportedLanguageName;
+                }
+            }
+            
+            console.log(mapExtensions);
+            return mapExtensions;
+        }
+        
+        
+        
+        // Addds content changed listener to `editor` and invokes `callback` with all change events.
+        function onDidChangeModelContentBulk(editor, callback)
+        {
+            return editor.getModel().addBulkListener(function (events)
+            {
+                contentChangeEvents = events.filter(function (e)
+                {
+                    // console.log(e); // contentChanged, rawContentChanged2
+                    return e.type === 'rawContentChanged2';
+                }).map(function (e)
+                {
+                    // console.log(e.data);
+                    return e.data; //return e.getData();
+                });
+                if (contentChangeEvents.length > 0)
+                {
+                    callback(editor, contentChangeEvents);
+                }
+            });
+        }
+
+        
+        // https://stackoverflow.com/questions/45123386/scroll-to-line-in-monaco-editor
+        function sampleScrolling(editor)
+        {
+            editor = editor || window.editor;
+            
+            if(false)
+            {
+                // Scroll to top, in px:
+                editor.setScrollPosition({scrollTop: 0});
+                
+                // Scroll to a specific line:
+                editor.revealLine(15);
+                
+                // Scroll to a specific line so it ends in the center of the editor:
+                editor.revealLineInCenter(15);
+                
+                // Move current active line:
+                editor.setPosition({column: 1, lineNumber: 3});
+            }
+            
+            editor.setPosition({column: 1, lineNumber: editor.getModel().getLineCount()});
+            // I just want to add that if you want to scroll to the last line, you can use
+            editor.revealLine(editor.getModel().getLineCount())
+        }
+        
+        // https://stackoverflow.com/questions/56840298/how-to-change-display-language-on-monaco-editor
+        function changeLanguage(lang)
+        {
+            monaco.editor.setModelLanguage(window.editor.getModel(), lang);
+            // console.log(`model language was changed to ${window.editor.getModel().getLanguageIdentifier().language}`);
+            console.log(`model language was changed to ${window.editor.getModel().getLanguageId()}`);
+            
+        }
+
+
+       
+        
+        async function testMain()
+        {
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const params = Object.fromEntries(urlSearchParams.entries());
+            var fileExt = params.file.split('.').pop();
+            var lingo = getSupportedLanguages()[fileExt];
+            var go_to_line = parseInt(params.line);
+            console.log("search", params.file, fileExt, lingo, go_to_line);
+            
+            let resp = await fetch("/textfile?file=" + encodeRfc3986(params.file));
+            let txt = await resp.text();
+
+            
+            
+            
+            
+            // console.log(require);
+            require.config({ paths: { 'vs': 'js/monaco-editor/min/vs' } });
+            require(['vs/editor/editor.main'], function ()
+            {
+                window.editor = monaco.editor.create(document.getElementById('container'), {
+                    value: txt,
+                    // https://github.com/Microsoft/monaco-languages
+                    // https://github.com/Microsoft/monaco-editor
+                    // https://microsoft.github.io/monaco-editor/playground.html
+                    //language: 'javascript'
+                    language: lingo
+                    //language: 'markdown'
+                });
+                
+                /*
+                // https://github.com/Microsoft/monaco-editor/issues/341
+                onDidChangeModelContentBulk(window.editor, function (editor, e)
+                {
+                    // console.log("change", arguments);
+                    console.log(editor.getValue());
+                });
+                */
+
+                // console.log("cursor position: ", window.editor.getPosition());
+                // console.log("set position: ", window.editor.setPosition({ lineNumber: 2, column: 14 }));
+                window.editor.setPosition({column: 1, lineNumber: go_to_line});
+                window.editor.revealLineInCenter(go_to_line);
+                
+                // https://github.com/Microsoft/monaco-editor/issues/194
+                // if (window.editor.isFocused())
+                window.editor.focus();
+            });
+        }
+        
+        testMain();
+        
+    </script>
+
+
+    <script type="text/javascript">
+
+        function onDomReady()
+        {
+            console.log("dom ready");
+        }
+        
+        if (document.addEventListener) document.addEventListener("DOMContentLoaded", onDomReady, false);
+        else if (document.attachEvent) document.attachEvent("onreadystatechange", onDomReady);
+        else window.onload = onDomReady;
+
+        function onPageLoaded()
+        {
+            console.log("page loaded");
+        }
+        
+        if (window.addEventListener) window.addEventListener("load", onPageLoaded, false);
+        else if (window.attachEvent) window.attachEvent("onload", onPageLoaded);
+        else window.onload = onPageLoaded;
+    </script>
+
+    <script>
+
+        // https://github.com/evanw/esbuild
+        // https://github.com/privatenumber/minification-benchmarks
+        // https://gist.github.com/jdhuntx/2967547
+
+
+
+
+        /// Class to represent a content type.
+        function ContentType(type)
+        {
+            this.parameters = Object.create(null)
+            this.type = type
+        }
+
+
+        // https://shaka-player-demo.appspot.com/docs/api/lib_util_mime_utils.js.html
+        // https://github.com/jshttp/content-type/blob/master/index.js
+        class MyMimeType
+        {
+
+            static getContainerType(mimeType)
+            {
+                return mimeType.split(';')[0].split('/')[1];
+            }
+
+
+
+            static parse(string)
+            {
+                if (!string)
+                {
+                    throw new TypeError('argument string is required')
+                }
+
+                // support req/res-like objects as argument
+                // var header = typeof string === 'object' ? getcontenttype(string) : string
+                var header = string;
+
+                if (typeof header !== 'string')
+                {
+                    throw new TypeError('argument string is required to be a string')
+                }
+
+                var index = header.indexOf(';')
+                var type = index !== -1
+                    ? header.substr(0, index).trim()
+                    : header.trim()
+
+                var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
+                if (!TYPE_REGEXP.test(type))
+                {
+                    throw new TypeError('invalid media type')
+                }
+
+                var obj = new ContentType(type.toLowerCase())
+
+
+                var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g; // eslint-disable-line no-control-regex
+                var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g; // eslint-disable-line no-control-regex
+
+                // parse parameters
+                if (index !== -1)
+                {
+                    var key
+                    var match
+                    var value
+
+                    PARAM_REGEXP.lastIndex = index
+
+                    while ((match = PARAM_REGEXP.exec(header)))
+                    {
+                        if (match.index !== index)
+                        {
+                            throw new TypeError('invalid parameter format')
+                        }
+
+                        index += match[0].length
+                        key = match[1].toLowerCase()
+                        value = match[2]
+
+                        if (value[0] === '"')
+                        {
+                            // remove quotes and escapes
+                            value = value
+                                .substr(1, value.length - 2)
+                                .replace(QESC_REGEXP, '$1')
+                        }
+
+                        obj.parameters[key] = value
+                    }
+
+                    if (index !== header.length)
+                    {
+                        throw new TypeError('invalid parameter format')
+                    }
+                }
+
+                return obj
+            }
+
+        }
+
+
+        // var login = await fetch("https://nicoin.cor-asp.ch/Interface_STZH/API/Login?N=XXX&P=YYY", { "credentials": "same-origin" });
+
+
+
+        /*
+        var resp = await fetch("sql.ashx", {
+            method: "POST",
+            "credentials": "same-origin",
+            "cache": "no-cache",
+            "redirect": "follow",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            body: `{}`
+        });
+        */
+
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+
+        async function postFetch(url, payload)
+        {
+            let bdy = null;
+
+            if (typeof (payload) === 'string' || payload instanceof String)
+                bdy = payload;
+
+            if (typeof (payload) === 'object')
+                bdy = JSON.stringify(payload);
+
+            if (url.indexOf("?") != -1)
+            {
+                url += "&"
+            }
+            else
+                url += "?"
+
+            url += "no_cache=" + (new Date()).getTime().toString();
+
+
+
+
+            // console.log(bdy);
+
+            //const data = new URLSearchParams();
+            //for (const pair of new FormData(formElement))
+            //{
+            //    data.append(pair[0], pair[1]);
+            //}
+
+
+            let formData = new FormData();
+
+            for (const key in payload)
+            {
+                if (payload.hasOwnProperty(key))
+                {
+                    formData.append(key, payload[key]);
+                }
+            }
+
+            // body: new URLSearchParams("email=test@example.com&password=pw")
+
+            // Do not set the content-type header.
+            bdy = formData;
+
+            // formData.append('name', 'John');
+            // formData.append('password', 'John123');
+
+
+            let response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    "Accept": "application/json"
+                    // , "Content-Type": "application/json"
+                    , "credentials": "same-origin" // the default would be same-origin, but there's an exciting Edge-bug ...
+                    , "pragma": "no-cache"
+                    , "cache-control": "no-cache"
+                }
+                , body: bdy
+            });
+
+
+
+
+
+            var ct = response.headers.get("Content-Type");
+            console.log("content-type: ", ct);
+
+            var mt = MyMimeType.parse(ct);
+            console.log("parsed-content-type: ", mt.type);
+            console.log("parsed-charset: ", mt.parameters.charset);
+
+            return response;
+        }
+
+
+
+        async function fetchJSON(url, payload)
+        {
+
+            if (url.indexOf("?") != -1)
+            {
+                url += "&"
+            }
+            else
+                url += "?"
+
+            url += "no_cache=" + (new Date()).getTime().toString();
+
+            let result = await postFetch(url, payload);
+            let data = await result.json();
+            return data;
+        }
+
+
+        async function fetchText(url, payload)
+        {
+            if (url.indexOf("?") != -1)
+            {
+                url += "&"
+            }
+            else
+                url += "?"
+
+            url += "no_cache=" + (new Date()).getTime().toString();
+
+            let result = await postFetch(url, payload);
+            let data = await result.text();
+            return data;
+        }
+
+
+        function isNullOrWhitespace(input)
+        {
+            return !input || input.replace(/\s/g, '').length < 1;
+        }
+
+
+        function outputWrapped(jobj)
+        {
+            let wrapped = new TableWrapper(jobj.data.tables[0].columns, jobj.data.tables[0].rows, false);
+            console.log("wrapped", wrapped);
+
+            // console.log(wrapped.columnCount);
+            // console.log(wrapped.columns);
+            // console.log(wrapped.columnMap);
+
+            for (let i = 0; i < wrapped.rowCount; ++i)
+            {
+                // console.log(wrapped.row(i).BE_ID);
+                // console.log(wrapped.row(i).BE_User);
+                // console.log(wrapped.row(i).BE_Language);
+                // console.log(wrapped.row(i).BE_Passwort);
+                // console.log(wrapped.row(i).BE_Hash);
+
+                for (let j = 0; j < wrapped.columnCount; ++j)
+                {
+                    let columnName = wrapped.columns[j];
+                    console.log(columnName, wrapped.row(i)[columnName]);
+                }
+
+            }
+
+        }
+
+
+        function tableCreate(currentTable)
+        {
+            /*
+            const body = document.body;
+            const tbl = document.createElement('table');
+
+
+            tbl.style.width = '100px';
+            tbl.style.border = '1px solid black';
+
+            for (let i = 0; i < 3; i++)
+            {
+                const tr = tbl.insertRow();
+                for (let j = 0; j < 2; j++)
+                {
+                    if (i === 2 && j === 1)
+                    {
+                        break;
+                    } else
+                    {
+                        const td = tr.insertCell();
+                        td.appendChild(document.createTextNode(`Cell I${i}/J${j}`));
+                        td.style.border = '1px solid black';
+                        if (i === 1 && j === 1)
+                        {
+                            td.setAttribute('rowSpan', '2');
+                        }
+                    }
+                }
+            }
+            body.appendChild(tbl);
+            */
+
+
+
+
+
+
+            var tbl = document.createElement('table');
+
+            // tbl.setAttribute("class", "altBlue");
+            // tbl.setAttribute("class", "altBlack");
+            tbl.setAttribute("class", "altGreen");
+
+
+            // thead
+            var th = tbl.createTHead();
+            var thr = th.insertRow();
+
+            if (true)
+            {
+                // works
+
+                for (let j = 0; j < currentTable.columns.length; ++j)
+                {
+                    let columnName = currentTable.columns[j];
+                    // console.log(columnName, currentTable.rows[i][j]);
+
+                    var thc = document.createElement('th');
+                    var tht = document.createTextNode(columnName);
+                    thc.appendChild(tht);
+                    thr.appendChild(thc);
+                }
+            }
+            else
+            {
+                // does not work
+                var thc = thr.insertCell();
+            }
+
+
+
+
+            // tbody
+            let tbody = tbl.createTBody();
+
+
+            for (let i = 0; i < currentTable.rows.length; ++i)
+            {
+                var tr = tbody.insertRow();
+
+                for (let j = 0; j < currentTable.columns.length; ++j)
+                {
+                    // let columnName = currentTable.columns[j];
+                    // console.log(columnName, currentTable.rows[i][j]);
+
+                    var tc = tr.insertCell();
+                    var tt = document.createTextNode(currentTable.rows[i][j]);
+                    tc.appendChild(tt);
+                }
+            }
+
+
+            // tfoot
+            var tf = tbl.createTFoot();
+            var tfr = tf.insertRow();
+
+            for (let j = 0; j < currentTable.columns.length; ++j)
+            {
+                let columnName = currentTable.columns[j];
+
+                var tfc = tfr.insertCell();
+                var tft = document.createTextNode(columnName);
+                tfc.appendChild(tft);
+            }
+
+            return tbl;
+        }
+
+
+        async function removeAllTables()
+        {
+            var tables = document.getElementsByTagName("TABLE");
+            for (var i = tables.length - 1; i >= 0; i -= 1)
+                if (tables[i]) tables[i].parentNode.removeChild(tables[i]);
+
+            var spacing = document.getElementsByClassName("dataset_separator");
+            for (var i = spacing.length - 1; i >= 0; i -= 1)
+                if (spacing[i]) spacing[i].parentNode.removeChild(spacing[i]);
+        }
+
+        async function appendMonaco()
+        {
+            const lineCount = editor.getModel().getLineCount();
+            const lastLineLength = editor.getModel().getLineMaxColumn(lineCount);
+
+            const range = new monaco.Range(
+                lineCount,
+                lastLineLength,
+                lineCount,
+                lastLineLength
+            );
+
+            editor.executeEdits('', [
+                { range: range, text: 'your content to add' }
+            ])
+        }
+
+
+        async function searchAndReplace()
+        {
+            /*
+            var line = window.editor.getPosition();
+            var range = new monaco.Range(line.lineNumber, 1, line.lineNumber, 1);
+            // https://newbedev.com/how-do-i-insert-text-into-a-monaco-editor
+
+            window.editor.executeEdits("", [
+                { range: new monaco.Range(1, 14, 1, 20), text: "prepend" }
+            ]);
+
+
+            window.editor.getModel().onDidChangeContent(event =>
+            {
+                console.log(event);
+                console.log(window.editor.getValue());
+            });
+            */
+
+            // editor.getPosition().lineNumber
+            // editor.getModel().getLineContent(editor.getPosition().lineNumber)
+
+            // Overwrite selected text
+            // window.editor.trigger('keyboard', 'type', { text: "test" });
+
+
+            // executeEdits(source: string | null | undefined, edits: IIdentifiedSingleEditOperation[], endCursorState ?: ICursorStateComputer | Selection[]): boolean;
+
+
+
+            // window.editor.executeEdits("select", [ { range: window.editor.getSelection(), text: "deselect" } ]);
+
+            // const action = window.editor?.getAction("actions.find");
+            // void action?.run();
+
+            window.editor.getAction('editor.action.startFindReplaceAction').run()
+        }
+
+
+
+
+        async function fetchData()
+        {
+            removeAllTables();
+
+            let allText = window.editor.getValue();
+            let selectedText = window.editor.getModel().getValueInRange(window.editor.getSelection());
+            // window.editor.setValue('SELECT * FROM T_Benutzer'); // set text
+
+
+            let sql = isNullOrWhitespace(selectedText) ? allText : selectedText;
+            /// sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME LIKE 'T[_]%' ORDER BY TABLE_SCHEMA, TABLE_NAME; ";
+            // sql = ``;
+
+            var jobj = await fetchJSON("a9fcaa7db8c945b5a247a263b87ca266/sql.ashx", { "sql": sql });
+
+            // console.log("jobj", jobj);
+            // console.log(JSON.stringify(jobj, null, 2));
+
+            if (!jobj.data)
+            {
+                console.log("status", jobj.StatusCode);
+                console.log("msg", jobj.ErrorMessage);
+                console.log("stack", jobj.StackTrace);
+                alert(jobj.ErrorMessage);
+                return;
+            }
+
+            for (let i = 0; i < jobj.data.tables.length; ++i)
+            {
+                let tbl = tableCreate(jobj.data.tables[i]);
+
+
+                if (i != 0)
+                {
+                    var frag = document.createDocumentFragment();
+                    for (let j = 0; j < 2; ++j)
+                    {
+                        var br = document.createElement("BR");
+                        br.setAttribute("class", "dataset_separator");
+                        frag.appendChild(br);
+                    }
+
+                    frag.appendChild(tbl);
+                    document.body.appendChild(frag);
+                }
+                else
+                    document.body.appendChild(tbl);
+            }
+
+
+            //let currentTable = jobj.data.tables[0];
+
+            //for (let i = 0; i < currentTable.rows.length; ++i)
+            //{
+            //    for (let j = 0; j < currentTable.columns.length; ++j)
+            //    {
+            //        let columnName = currentTable.columns[j];
+            //        console.log(columnName, currentTable.rows[i][j]);
+            //    }
+            //}
+
+        }
+
+    </script>
+
+    <input type="button" onclick="fetchData();" value="Execute" style="margin-left: 2mm;" />
+    <input type="button" onclick="sampleScrolling();" value="Scroll" style="margin-left: 2mm;" />
+
+    <link rel="stylesheet" media="all" href="js/table_blue.css?v=2022-06-27T10-55-00" />
+    <link rel="stylesheet" media="all" href="js/table_black.css?v=2022-06-27T10-55-00" />
+    <link rel="stylesheet" media="all" href="js/table_green.css?v=2022-06-27T10-55-00" />
+
+</body>
+</html>
